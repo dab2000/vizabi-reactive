@@ -7,7 +7,7 @@ import { filter } from "../filter";
 const defaultConfig = {
     source: null,
     concept: null,
-    filter: {}
+    //filter: {}
 }
 
 export function dataConfig(config = {}, parent) {

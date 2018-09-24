@@ -1,30 +1,27 @@
-import { autorun, action, spy, observable } from 'mobx';
-import { vizabi } from './vizabi';
-import { config } from './linechart/config';
-import appState from './appState';
-import Linechart from './linechart/index';
-import { isEntityConcept, arrayEquals, relativeComplement } from './utils';
+import { autorun, action, spy, observable } from 'mobx'
+import { vizabi } from './vizabi'
+import { config } from './config'
+import appState from './appState'
+import { fromPromise } from 'mobx-utils';
+import { isEntityConcept, fromPromiseAll, arrayEquals, relativeComplement } from './utils';
 
 var ddfcsv = new DDFCsvReader.getDDFCsvReaderObject();
 var waffle = new WsReader.WsReader.getReader();
 vizabi.stores.dataSource.createAndAddType('ddfcsv', ddfcsv);
 vizabi.stores.dataSource.createAndAddType('waffle', waffle);
-//window.viz = vizabi(config);
-//window.vizabi = vizabi;
+window.viz = vizabi(config);
+window.vizabi = vizabi;
 window.autorun = autorun;
 
-const tool = new Linechart(d3.select("#wrapper").node(), config);
-
-window.viz = {config: tool.getConfig(), stores: tool.getStores()};
-
 autorun(() => {
-    d3.select("#right pre").html(JSON.stringify(viz.config, null, 2))
+    d3.select("#right pre").html(JSON.stringify(vizabi.config, null, 2))
 }, { name: "showcfg" })
 
+
+//spy((event) => {
+//    console.log(`${event.name}`, event)
+//})
 /*
-spy((event) => {
-   console.log(`${event.name}`, event)
-})
 spy((event) => {
     if (event.type === 'action') {
         console.log(`${event.name} with args: `, event, event.arguments)
@@ -33,7 +30,6 @@ spy((event) => {
 */
 
 //autorun(chart);
-
 chart();
 
 function chart() {
@@ -82,7 +78,7 @@ function chart() {
         playtoggle = timecontrol.select("#toggle")
             .on('click', function() { frameCfg.togglePlaying() })
         timeslider = timecontrol.select("#timeslider")
-        .on('input', function() { frameCfg.setValueAndStop(this.value) });
+            .on('input', function() { frameCfg.setValueAndStop(this.value) });
         speedslider = timecontrol.select("#speedslider")
             .attr('min', 1)
             .attr('max', 1000)
@@ -123,8 +119,8 @@ function chart() {
     updateSize();
 
     autorun(setupTimecontrol);
-    //autorun(drawBubbles);
-    //autorun(drawChart);
+    autorun(drawBubbles);
+    autorun(drawChart);
     autorun(drawLegend);
     autorun(drawTimecontrol);
     autorun(drawEncoding);
@@ -148,8 +144,8 @@ function chart() {
 
         zoomScales = observable({
             t: d3.zoomTransform(chart),
-            get x() { return this.t.rescaleX(xConfig.scale.d3Scale) },
-            get y() { return this.t.rescaleY(yConfig.scale.d3Scale) },
+            get x() { return this.t.rescaleX(xConfig.d3Scale) },
+            get y() { return this.t.rescaleY(yConfig.d3Scale) },
             setTransform: action(function(t) {
                 this.t = t
             })
@@ -258,9 +254,7 @@ function chart() {
                         return zoomScales.y(d.y);
                     })
                     .style("fill", function(d) {
-                        return d.color == null ?
-                            "#ffffff" :
-                            colorConfig.scale.d3Scale(d.color);
+                        return colorConfig.d3Scale(d.color);
                     })
                     .style('animation', d => {
                         return superHighlight.data.filter.has(d) ?
@@ -273,7 +267,7 @@ function chart() {
                     .style('opacity', getOpacity)
                     .attr("r", d => {
                         const which = sizeConfig.which;
-                        const radius = isNaN(which) ? sizeConfig.scale.d3Scale(d.size) : which;
+                        const radius = isNaN(which) ? sizeConfig.d3Scale(d.size) : which;
                         return radius;
                     })
                     .each(drawLabel);
@@ -378,14 +372,13 @@ function chart() {
 
         function draw() {
 
+            const colorConfig = marker.encoding.get("color");
             const superHighlight = marker.encoding.get("superhighlighted");
-            let colorConfig = marker.encoding.get('color');
             let data;
 
             if (isEntityConcept(colorConfig.data.conceptProps)) {
                 // need extra query
                 data = legendmarker.dataArray;
-                colorConfig = legendmarker.encoding.get('color');
             } else {
                 data = colorConfig.scale.domain.map(d => ({ color: d, name: d }));
             }
@@ -409,7 +402,7 @@ function chart() {
                 .attr("x", appState.width - 18)
                 .attr("width", 18)
                 .attr("height", 18)
-                .style("fill", d => colorConfig.scale.d3Scale(d.color))
+                .style("fill", d => colorConfig.d3Scale(d.color))
                 .on("mouseover", d => {
                     const values = marker.dataArray.filter(d2 => d2["color"] == d["color"] && !d2[Symbol.for('trail')]);
                     superHighlight.data.filter.set(values);
@@ -596,7 +589,7 @@ function chart() {
                     const enc = marker.encoding.get(encId)
                     return d.value && d.value.concept == enc.data.concept && arrayEquals(d.key, enc.data.space);
                 })
-                .text(d => !d.value ? 'n/a' : d.value.name + ' (' + d.key.join(',') + ') [' + d.source.path + ']')
+                .text(d => !d.value ? 'n/a' : d.value.name + ' (' + d.key.join(',') + ')')
                 .sort((a, b) => !a.value || !b.value ? 0 : (a.value.name > b.value.name ? 1 : -1));
             const selExit = selUpdate.exit().remove();
 

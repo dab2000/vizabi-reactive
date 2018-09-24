@@ -1,13 +1,15 @@
 import { markerStore } from './marker/markerStore'
 import { encodingStore } from './encoding/encodingStore'
 import { dataSourceStore } from './dataSource/dataSourceStore'
+//import { toolStore } from './tool/toolStore'
 import { isString } from './utils'
 import { observable } from 'mobx';
 
 export const stores = {
     marker: markerStore,
     dataSource: dataSourceStore,
-    encoding: encodingStore
+    encoding: encodingStore,
+//    tool: toolStore,
 }
 
 let config;
@@ -18,6 +20,7 @@ export const vizabi = function(cfg) {
     dataSourceStore.setMany(config.dataSource || {});
     encodingStore.setMany(config.encoding || {});
     markerStore.setMany(config.marker || {});
+//    toolStore.setMany(config.tool || {});
 
     return { stores, config };
 }
@@ -46,7 +49,7 @@ export function resolveRef(possibleRef) {
         return resolveTreeRef(ref.config, config);
     } else {
         const model = resolveTreeRef(ref.model, stores);
-        return transformModel(model, ref.transform);
+        return ref.transform ? transformModel(model, ref.transform) : model;
     }
 }
 
