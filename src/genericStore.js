@@ -75,6 +75,10 @@ export const createStore = function(baseType, extendedTypes = {}) {
                 map.set(prop, this.getByDefinition(defs[prop]))
             })
             return map;
+        },
+
+        getId(model) {
+            return [...this.named.entries()].find(m => m[1] === model)[0];
         }
 
     });

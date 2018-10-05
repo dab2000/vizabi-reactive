@@ -37,15 +37,15 @@ export const config = {
             type: "ddfcsv",
             path: "https://raw.githubusercontent.com/open-numbers/ddf--gapminder--systema_globalis/develop"
         },*/
-        /*gap: {
-            type: "waffle",
+        gap: {
+            modelType: "waffle",
             "path": "https://waffle-server.gapminder.org/api/ddf/ql",
             "assetsPath": "https://import-waffle-server.gapminder.org/api/ddf/assets/"
-        },*/
-        gap: {
+        },
+        /*gap: {
             modelType: "ddfcsv",
             path: "./ddf--jheeffer--mdtest/"
-        },
+        },*/
         /*
                 sg: {
                     type: "ddfcsv",

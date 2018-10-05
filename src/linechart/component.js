@@ -20,24 +20,6 @@ import { warn as iconWarn,
 import { autorun, action, when, reaction, spy, observable } from 'mobx';
 import { FULFILLED } from "mobx-utils";
 
-//TODO: move
-// Copies a variable number of methods from source to target.
-d3.rebind = function(target, source) {
-  let i = 1, method;
-  const n = arguments.length;
-  while (++i < n) target[method = arguments[i]] = d3_rebind(target, source, source[method]);
-  return target;
-};
-
-// Method is assumed to be a standard D3 getter-setter:
-// If passed with no arguments, gets the value.
-// If passed with arguments, sets the value and returns the target.
-function d3_rebind(target, source, method) {
-  return function() {
-    const value = method.apply(source, arguments);
-    return value === source ? target : value;
-  };
-}
 
 //
 // LINE CHART COMPONENT
@@ -312,7 +294,7 @@ const LCComponent = Component.extend("linechart", {
     //this.KEYS.join(",");
     ////this.dataKeys = this.model.marker.getDataKeysPerHook();
 
-    this.all_steps = [...this.model.marker.encoding.get("frame").frameMap.keys()];
+    this.all_steps = [...this.model.marker.encoding.get("frame").frameMap.keys()].sort(d3.ascending);
     ////this.model.time.getAllSteps();
     this.all_values = this.values = null;
     this.allNested = this.getNested();
@@ -423,7 +405,7 @@ const LCComponent = Component.extend("linechart", {
       .on("click", () => {
         _this.parent
           .findChildByName("gapminder-treemenu")
-          .markerID("axis_y")
+          .markerID("y")
           .alignX("left")
           .alignY("top")
           .updateView()

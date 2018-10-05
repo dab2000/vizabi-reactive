@@ -1,6 +1,7 @@
 //import "./styles.scss";
 import Tool from "../vizabi-stub/base/tool";
 import timeslider from "../vizabi-stub/components/timeslider/timeslider";
+import treemenu from "../vizabi-stub/components/treemenu/treemenu"
 import component from "./component";
 import { createTransformer } from "mobx-utils";
 
@@ -45,11 +46,18 @@ const LineChart = Tool.extend("LineChart", {
       component: Vizabi.Component.get("buttonlist"),
       placeholder: ".vzb-tool-buttonlist",
       model: ["state", "ui", "locale"]
+      */
     }, {
-      component: Vizabi.Component.get("treemenu"),
+      component: treemenu,
       placeholder: ".vzb-tool-treemenu",
-      model: ["state.marker", "state.marker_tags", "state.time", "locale"]
-    }, {
+      model: model => ({
+        frame: model.marker.get("bubble").encoding.get("frame"),
+        marker: model.marker.get("bubble"),
+        ui: model.ui,
+        dataSources: model.dataSource
+      }),
+      //model: ["state.marker", "state.time", "locale", "ui"]
+/*    }, {
       component: Vizabi.Component.get("datawarning"),
       placeholder: ".vzb-tool-datawarning",
       model: ["locale"]

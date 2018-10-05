@@ -1,6 +1,6 @@
 import { baseDataSource } from './baseDataSource'
 import { createStore } from '../genericStore'
-import { defaultDecorator } from '../utils'
+import { defaultDecorator, mergeResults } from '../utils'
 
 export const dataSourceStore = createStore(baseDataSource);
 
@@ -19,4 +19,12 @@ dataSourceStore.createAndAddType = function(type, readerObject) {
             }
         }
     }));
+}
+
+dataSourceStore.getTags = function() {
+    const S_DSNAME = Symbol.for("dataSourceName");
+    
+    return Promise.all([...this.named.values()].map(ds => ds.getTags().then(
+        tags => tags.map(tag => { tag[S_DSNAME] = this.getId(ds); return tag; } ))))
+        .then(results => mergeResults(results, ["tag"]));
 }

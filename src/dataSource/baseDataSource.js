@@ -50,7 +50,7 @@ const functions = {
         });
         return av;
     },
-    get availabilityPromise() {
+    get conceptsAvailabilityPromise() {
         const conceptsQuery = {
             select: {
                 key: ["key", "value"],
@@ -58,30 +58,44 @@ const functions = {
             },
             from: "concepts.schema"
         };
-        const entitiesQuery = deepmerge.all([{}, conceptsQuery, { from: "entities.schema" }]);
-        const datapointsQuery = deepmerge.all([{}, conceptsQuery, { from: "datapoints.schema" }]);
+        return fromPromise(this.query(conceptsQuery));
+    },
+    get availabilityPromise() {
+        const schemaQuery = {
+            select: {
+                key: ["key", "value"],
+                value: []
+            }
+        }
+        const entitiesQuery = deepmerge.all([{}, schemaQuery, { from: "entities.schema" }]);
+        const datapointsQuery = deepmerge.all([{}, schemaQuery, { from: "datapoints.schema" }]);
 
         return fromPromise(Promise.all([
-            this.query(conceptsQuery),
+            this.conceptsAvailabilityPromise,
             this.query(entitiesQuery),
             this.query(datapointsQuery)
         ]));
     },
     get conceptsPromise() {
-        return this.query({
-            select: {
-                key: ["concept"],
-                value: ["name", "domain", "concept_type"]
-            },
-            from: "concepts"
-        });
+        return fromPromise(this.conceptsAvailabilityPromise.then(concepts => this.query({
+                select: {
+                    key: ["concept"],
+                    value: [...concepts.map(c => c.value)]//["name", "domain", "concept_type"]
+                },
+                from: "concepts"
+
+            })
+        ));
     },
     get metaDataPromise() {
         return fromPromise(Promise.all([this.availabilityPromise, this.conceptsPromise]));
     },
     get concepts() {
         if (this.conceptsPromise.state != FULFILLED) return new Map();
-        else return new Map(this.conceptsPromise.value.map(c => [c.concept, c]));
+        else return new Map([
+            ["_default", { concept: "_default", concept_type: "string", use: "constant", scales: ["ordinal"], tags: "_root" }], 
+            ...this.conceptsPromise.value.map(c => [c.concept, c])
+        ]);
     },
     getConcept(conceptId) {
         if (conceptId == "concept_type" || conceptId.indexOf('is--') === 0)
@@ -90,6 +104,25 @@ const functions = {
     },
     isEntityConcept(conceptId) {
         return ["entity_set", "entity_domain"].includes(this.getConcept(conceptId).concept_type);
+    },
+    get tagsPromise() {
+        return this.query({
+            select: {
+                key: ["tag"],
+                value: ["name", "parent"]
+            },
+            from: "entities"
+        });
+    },
+    getTags(){
+        return fromPromise(this.tagsPromise);
+    },
+    getDatasetName() {
+        if (this.reader.getDatasetInfo) {
+          const meta = this.readerObject.getDatasetInfo();
+          return meta.name + (meta.version ? " " + meta.version : "");
+        }
+        return "";////this._name.replace("data_", "");
     },
     query: function(query) {
         //return [];
