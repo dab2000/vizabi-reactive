@@ -636,6 +636,9 @@ const TreeMenu = Component.extend({
     }, {
       name: "ui",
       type: "ui"
+    }, {
+      name: "dataSources",
+      type: "store"
     }];
 
     this.context = context;

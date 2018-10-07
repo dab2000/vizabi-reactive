@@ -21,22 +21,11 @@ const LineChart = Tool.extend("LineChart", {
     this.components = [{
       component,
       placeholder: ".vzb-tool-viz",
-      model: model => ({
-        frame: model.marker.get("bubble").encoding.get("frame"),
-        marker: model.marker.get("bubble"),
-        locale: model.locale,
-        ui: model.ui
-      })
-//      model: ["state.time", "state.marker", "locale", "ui"] //pass models to component
+      model: ["marker:bubble.encoding:frame", "marker:bubble", "locale", "ui"] //pass models to component
     }, {
       component: timeslider,
       placeholder: ".vzb-tool-timeslider",
-      model: model => ({
-        frame: model.marker.get("bubble").encoding.get("frame"),
-        marker: model.marker.get("bubble"),
-        ui: model.ui
-      }),
-      //model: ["state.time", "state.marker", "ui"],
+      model: ["marker:bubble.encoding:frame", "marker:bubble", "ui"],
       ui: { show_value_when_drag_play: true, axis_aligned: false }
 /*    }, {
       component: Vizabi.Component.get("dialogs"),
@@ -50,13 +39,7 @@ const LineChart = Tool.extend("LineChart", {
     }, {
       component: treemenu,
       placeholder: ".vzb-tool-treemenu",
-      model: model => ({
-        frame: model.marker.get("bubble").encoding.get("frame"),
-        marker: model.marker.get("bubble"),
-        ui: model.ui,
-        dataSources: model.dataSource
-      }),
-      //model: ["state.marker", "state.time", "locale", "ui"]
+      model: ["marker:bubble", "marker:bubble.encoding:frame", "locale", "ui", "dataSource"]
 /*    }, {
       component: Vizabi.Component.get("datawarning"),
       placeholder: ".vzb-tool-datawarning",

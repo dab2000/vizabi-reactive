@@ -30,7 +30,7 @@ const LCComponent = Component.extend("linechart", {
     this.name = "linechart";
     this.template = require("raw-loader!./template.html");
 
-    /*//define expected models for this component
+    //define expected models for this component
     this.model_expects = [{
       name: "time",
       type: "time"
@@ -45,7 +45,7 @@ const LCComponent = Component.extend("linechart", {
       type: "ui"
     }];
 
-
+/*
     this.model_binds = {
       "change:time.value": function() {
         if (!_this._readyOnce) return;

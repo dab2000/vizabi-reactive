@@ -75,7 +75,7 @@ const TimeSlider = Component.extend({
     this.name = "gapminder-timeslider";
     this.template = this.template || require("raw-loader!./timeslider.html");
     this.prevPosition = null;
-    /*
+    
     //define expected models/hooks for this component
     this.model_expects = [{
       name: "time",
@@ -89,6 +89,7 @@ const TimeSlider = Component.extend({
     }];
 
     const _this = this;
+    /*
     //binds methods to this model
     this.model_binds = {
       "change:time": function(evt, path) {
@@ -99,20 +100,20 @@ const TimeSlider = Component.extend({
           }
           _this._optionClasses();
           //only set handle position if change is external
-          if (!_this.model.frame.dragging) _this._setHandle(_this.model.frame.playing);
+          if (!_this.model.time.dragging) _this._setHandle(_this.model.time.playing);
         }
       },
       "change:time.start": function(evt, path) {
         if (_this.slide) {
           //only set handle position if change is external
-          if (!_this.model.frame.dragging) _this._setHandle(_this.model.frame.playing);
+          if (!_this.model.time.dragging) _this._setHandle(_this.model.time.playing);
           _this.ready();
         }
       },
       "change:time.end": function(evt, path) {
         if (_this.slide) {
           //only set handle position if change is external
-          if (!_this.model.frame.dragging) _this._setHandle(_this.model.frame.playing);
+          if (!_this.model.time.dragging) _this._setHandle(_this.model.time.playing);
           _this.ready();
         }
       },
@@ -143,7 +144,7 @@ const TimeSlider = Component.extend({
     // Same constructor as the superclass
     this._super(config, context);
 
-    reaction(() => this.model.marker.encoding.get("frame").value,
+    reaction(() => this.model.time.value,
       propValue => {
         if (this.slide) {
           // if ((["time.start", "time.end"]).indexOf(path) !== -1) {
@@ -152,7 +153,7 @@ const TimeSlider = Component.extend({
           // }
           //this._optionClasses();
           //only set handle position if change is external
-          if (!this.dragging) this._setHandle(this.model.frame.playing);
+          if (!this.dragging) this._setHandle(this.model.time.playing);
         }
       })
 
@@ -222,11 +223,11 @@ const TimeSlider = Component.extend({
     this.playButtons = this.element.select(".vzb-ts-btns");
 
     this.element.select(".vzb-ts-btn-play").on("click", () => {
-      _this.model.frame.togglePlaying();
+      _this.model.time.togglePlaying();
     });
 
     this.element.select(".vzb-ts-btn-pause").on("click", () => {
-      _this.model.frame.togglePlaying();
+      _this.model.time.togglePlaying();
     });
 
     //Scale
@@ -281,7 +282,7 @@ const TimeSlider = Component.extend({
 
     this.slider_outer.on("mousewheel", () => {
       //do nothing and dont pass the event on if we are currently dragging the slider
-      if (_this.model.frame.dragging) {
+      if (_this.model.time.dragging) {
         d3.event.stopPropagation();
         d3.event.preventDefault();
         d3.event.returnValue = false;
@@ -294,11 +295,11 @@ const TimeSlider = Component.extend({
 
     this._setSelectedLimitsId = 0; //counter for setSelectedLimits
 
-    if (this.model.frame.startSelected > this.model.frame.start) {
+    if (this.model.time.startSelected > this.model.time.start) {
       _this.updateSelectedStartLimiter();
     }
 
-    if (this.model.frame.endSelected < this.model.frame.end) {
+    if (this.model.time.endSelected < this.model.time.end) {
       _this.updateSelectedEndLimiter();
     }
 
@@ -329,9 +330,9 @@ const TimeSlider = Component.extend({
 
   //template and model are ready
   ready() {
-    if (this.model.frame.splash) return;
+    if (this.model.time.splash) return;
 
-    //if (!this.model.frame._ready) return utils.warn("TODO timeslider is fired ready event while time model is not ready yet! how come?");
+    //if (!this.model.time._ready) return utils.warn("TODO timeslider is fired ready event while time model is not ready yet! how come?");
 
     const _this = this;
 
@@ -349,19 +350,19 @@ const TimeSlider = Component.extend({
   },
 
   changeLimits() {
-    const limits = this.model.frame.scale.d3Scale.domain();
-    // // const minValue = this.model.frame.start;
-    // // const maxValue = this.model.frame.end;
+    const limits = this.model.time.scale.d3Scale.domain();
+    // // const minValue = this.model.time.start;
+    // // const maxValue = this.model.time.end;
     //scale
     this.xScale.domain(limits);
     //axis
     this.xAxis.tickValues(limits)
-      .tickFormat(this.model.frame.scale.tickFormatter);
+      .tickFormat(this.model.time.scale.tickFormatter);
   },
 
   changeTime() {
     //time slider should always receive a time model
-    const time = this.model.frame.value;
+    const time = this.model.time.value;
     //special classes
     this._optionClasses();
   },
@@ -371,9 +372,9 @@ const TimeSlider = Component.extend({
    * Ideally,it contains only operations related to size
    */
   updateSize(range) {
-    if (this.model.frame.splash) return;
+    if (this.model.time.splash) return;
 
-    this.model.frame.stopPlaying();
+    this.model.time.stopPlaying();
 
     this.profile = this.getActiveProfile(this.profiles, this.presentationProfileChanges);
 
@@ -435,10 +436,10 @@ const TimeSlider = Component.extend({
 
     const select = _this.model.marker.select;
     if (select.length == 0) {
-      if (_this.model.frame.start != null && _this.model.frame.end != null) {
-        _this.model.frame.set({
-          startSelected: new Date(_this.model.frame.start),
-          endSelected: new Date(_this.model.frame.end)
+      if (_this.model.time.start != null && _this.model.time.end != null) {
+        _this.model.time.set({
+          startSelected: new Date(_this.model.time.start),
+          endSelected: new Date(_this.model.time.end)
         }, null, false  /*make change non-persistent for URL and history*/);
       }
       return;
@@ -459,8 +460,8 @@ const TimeSlider = Component.extend({
       });
       _this.model.time
         .set({
-          startSelected: d3.max([min, new Date(_this.model.frame.start)]),
-          endSelected: d3.min([max, new Date(_this.model.frame.end)])
+          startSelected: d3.max([min, new Date(_this.model.time.start)]),
+          endSelected: d3.min([max, new Date(_this.model.time.end)])
         }, force, false  /*make change non-persistent for URL and history*/);
     });
   },
@@ -469,7 +470,7 @@ const TimeSlider = Component.extend({
     const _this = this;
     this.select.select("#clip-start-" + _this._id).remove();
     this.select.select(".selected-start").remove();
-    if (this.model.frame.startSelected && this.model.frame.startSelected > this.model.frame.start) {
+    if (this.model.time.startSelected && this.model.time.startSelected > this.model.time.start) {
       this.select.append("clipPath")
         .attr("id", "clip-start-" + _this._id)
         .append("rect");
@@ -484,7 +485,7 @@ const TimeSlider = Component.extend({
     const _this = this;
     this.select.select("#clip-end-" + _this._id).remove();
     this.select.select(".selected-end").remove();
-    if (this.model.frame.endSelected && this.model.frame.endSelected < this.model.frame.end) {
+    if (this.model.time.endSelected && this.model.time.endSelected < this.model.time.end) {
       this.select.append("clipPath")
         .attr("id", "clip-end-" + _this._id)
         .append("rect");
@@ -498,19 +499,19 @@ const TimeSlider = Component.extend({
   resizeSelectedLimiters() {
     const _this = this;
     this.select.select(".selected-start")
-      .attr("d", "M0,0H" + this.xScale(this.model.frame.startSelected));
+      .attr("d", "M0,0H" + this.xScale(this.model.time.startSelected));
     this.select.select("#clip-start-" + _this._id).select("rect")
       .attr("x", -this.height / 2)
       .attr("y", -this.height / 2)
       .attr("height", this.height)
-      .attr("width", this.xScale(this.model.frame.startSelected) + this.height / 2);
+      .attr("width", this.xScale(this.model.time.startSelected) + this.height / 2);
     this.select.select(".selected-end")
-      .attr("d", "M" + this.xScale(this.model.frame.endSelected) + ",0H" + this.xScale(this.model.frame.end));
+      .attr("d", "M" + this.xScale(this.model.time.endSelected) + ",0H" + this.xScale(this.model.time.end));
     this.select.select("#clip-end-" + _this._id).select("rect")
-      .attr("x", this.xScale(this.model.frame.endSelected))
+      .attr("x", this.xScale(this.model.time.endSelected))
       .attr("y", -this.height / 2)
       .attr("height", this.height)
-      .attr("width", this.xScale(this.model.frame.end) - this.xScale(this.model.frame.endSelected) + this.height / 2);
+      .attr("width", this.xScale(this.model.time.end) - this.xScale(this.model.time.endSelected) + this.height / 2);
   },
 
   _resizeProgressBar() {
@@ -527,10 +528,10 @@ const TimeSlider = Component.extend({
     if (time) {
       if (_this.completedTimeFrames.indexOf(time) != -1) return;
       _this.completedTimeFrames.push(time);
-      let next = _this.model.frame.incrementTime(time);
-      const prev = _this.model.frame.decrementTime(time);
-      if (next > _this.model.frame.end) {
-        if (time - _this.model.frame.end == 0) {
+      let next = _this.model.time.incrementTime(time);
+      const prev = _this.model.time.decrementTime(time);
+      if (next > _this.model.time.end) {
+        if (time - _this.model.time.end == 0) {
           next = time;
           time = prev;
         } else {
@@ -598,8 +599,8 @@ const TimeSlider = Component.extend({
     const _this = this;
     return function() {
 
-      if (_this.model.frame.playing)
-        _this.model.frame.setPlaying(false);
+      if (_this.model.time.playing)
+        _this.model.time.setPlaying(false);
 
       _this._optionClasses();
       _this.element.classed(class_dragging, true);
@@ -615,7 +616,7 @@ const TimeSlider = Component.extend({
         // Prevent window scrolling on cursor drag in Chrome/Chromium.
         d3.event.sourceEvent.preventDefault();
 
-        ////_this.model.frame.dragStart();
+        ////_this.model.time.dragStart();
         let posX = utils.roundStep(Math.round(d3.mouse(this)[0]), precision);
         value = _this.xScale.invert(posX);
         const maxPosX = _this.width;
@@ -629,11 +630,11 @@ const TimeSlider = Component.extend({
         //set handle position
         _this.handle.attr("cx", posX);
         _this.valueText.attr("transform", "translate(" + posX + "," + (_this.height / 2) + ")");
-        _this.valueText.text(+value);//_this.model.frame.formatDate(value, "ui"));
+        _this.valueText.text(+value);//_this.model.time.formatDate(value, "ui"));
       }
 
       //set time according to dragged position
-      if (value - _this.model.frame.value !== 0) {
+      if (value - _this.model.time.value !== 0) {
         _this._setTime(value);
       }
     };
@@ -648,8 +649,8 @@ const TimeSlider = Component.extend({
     return function() {
       _this._setTime.recallLast();
       _this.element.classed(class_dragging, false);
-      ////_this.model.frame.dragStop();
-      ////_this.model.frame.snap();
+      ////_this.model.time.dragStop();
+      ////_this.model.time.snap();
     };
   },
 
@@ -659,18 +660,18 @@ const TimeSlider = Component.extend({
    */
   _setHandle(transition) {
     const _this = this;
-    const value = this.model.frame.value;
+    const value = this.model.time.value;
     //this.slide.call(this.brush.extent([value, value]));
     const new_pos = this.xScale(value);
     //this.brush.move(this.slide, [new_pos, new_pos])
 
-    this.element.classed("vzb-ts-disabled", this.model.frame.end <= this.model.frame.start);
-    //    this.valueText.text(this.model.frame.formatDate(value));
+    this.element.classed("vzb-ts-disabled", this.model.time.end <= this.model.time.start);
+    //    this.valueText.text(this.model.time.formatDate(value));
 
     //    var old_pos = this.handle.attr("cx");
     //var new_pos = this.xScale(value);
     if (_this.prevPosition == null) _this.prevPosition = new_pos;
-    const delayAnimations = new_pos > _this.prevPosition ? this.model.frame.speed : 0;
+    const delayAnimations = new_pos > _this.prevPosition ? this.model.time.speed : 0;
     if (transition) {
       this.handle.attr("cx", _this.prevPosition)
         .transition()
@@ -681,7 +682,7 @@ const TimeSlider = Component.extend({
       this.valueText.attr("transform", "translate(" + _this.prevPosition + "," + (this.height / 2) + ")")
         .transition("text")
         .delay(delayAnimations)
-        .text(value);////this.model.frame.formatDate(value, "ui"));
+        .text(value);////this.model.time.formatDate(value, "ui"));
       this.valueText
         .transition()
         .duration(delayAnimations)
@@ -700,7 +701,7 @@ const TimeSlider = Component.extend({
         .transition("text");
       this.valueText
         .attr("transform", "translate(" + new_pos + "," + (this.height / 2) + ")")
-        .text(+value);////this.model.frame.formatDate(value, "ui"));
+        .text(+value);////this.model.time.formatDate(value, "ui"));
     }
     _this.prevPosition = new_pos;
 
@@ -719,8 +720,8 @@ const TimeSlider = Component.extend({
     //var now = new Date();
     //if (this._updTime != null && now - this._updTime < frameRate) return;
     //this._updTime = now;
-    const persistent = !this.model.frame.dragging && !this.model.frame.playing;
-    _this.model.frame.setValue(+time);//getModelObject("value").set(time, false, persistent); // non persistent
+    const persistent = !this.model.time.dragging && !this.model.time.playing;
+    _this.model.time.setValue(+time);//getModelObject("value").set(time, false, persistent); // non persistent
   },
 
 
@@ -734,7 +735,7 @@ const TimeSlider = Component.extend({
     const show_value = this.ui.show_value;
     const show_value_when_drag_play = this.ui.show_value_when_drag_play;
     const axis_aligned = this.ui.axis_aligned;
-    const show_play = (this.ui.show_button);//// && (this.model.frame.playable);
+    const show_play = (this.ui.show_button);//// && (this.model.time.playable);
 
     this.xAxis.labelerOptions({
       scaleType: "time",
@@ -751,7 +752,7 @@ const TimeSlider = Component.extend({
     });
 
     this.element.classed(class_hide_play, !show_play);
-    this.element.classed(class_playing, this.model.frame.playing);
+    this.element.classed(class_playing, this.model.time.playing);
     this.element.classed(class_show_value, show_value);
     this.element.classed(class_show_value_when_drag_play, show_value_when_drag_play);
     this.element.classed(class_axis_aligned, axis_aligned);

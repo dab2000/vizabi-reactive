@@ -54,7 +54,7 @@ const Component = Events.extend({
   },
 
   createModel(configModel) {
-    this.model = configModel(this.parent.model);//this._modelMapping(configModel);
+    this.model = this._modelMapping(configModel);
   },
 
   registerListeners() {
@@ -455,24 +455,29 @@ const Component = Events.extend({
       return;
     }
     //return a new model with the defined submodels
-    return new Model(this.name, values, null, this.model_binds);
+    return values;//new Model(this.name, values, null, this.model_binds);
     /**
      * Maps one model name to current submodel and returns info
      * @param {String} name Full model path. E.g.: "state.marker.color"
      * @returns {Object} the model info, with name and the actual model
      */
     function _mapOne(name) {
-      const parts = name.split(".");
+      const normName = (name[0] !== "." && name[1] !== ":") ? "." + name : name;
+      //const parts = name.split(".");
       let current = _this.parent.model;
-      let current_name = "";
-      while (parts.length) {
-        current_name = parts.shift();
-        current = current[current_name];
+      if (name !== ".") {
+        const partsRe = /(?:([:.])(\w+\b))/g;
+        let part;
+        while ((part = partsRe.exec(normName)) !== null) {
+          //part[1] - prefix: property if "." and store if ":"
+          //part[2] - name
+          current = part[1] === ":" ? current.get(part[2]) : current[part[2]];
+        }
       }
       return {
         name,
         model: current,
-        type: current ? current.getType() : null
+        type: null//current ? current.getType() : null
       };
     }
   },
