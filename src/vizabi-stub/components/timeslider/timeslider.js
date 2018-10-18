@@ -630,7 +630,7 @@ const TimeSlider = Component.extend({
         //set handle position
         _this.handle.attr("cx", posX);
         _this.valueText.attr("transform", "translate(" + posX + "," + (_this.height / 2) + ")");
-        _this.valueText.text(+value);//_this.model.time.formatDate(value, "ui"));
+        _this.valueText.text(_this.model.time.format.ui(value));
       }
 
       //set time according to dragged position
@@ -647,7 +647,7 @@ const TimeSlider = Component.extend({
   _getBrushedEnd() {
     const _this = this;
     return function() {
-      _this._setTime.recallLast();
+      _this._setTime.recallLast(true, [_this._setTime.argumentsLast[0], false]);
       _this.element.classed(class_dragging, false);
       ////_this.model.time.dragStop();
       ////_this.model.time.snap();
@@ -682,7 +682,7 @@ const TimeSlider = Component.extend({
       this.valueText.attr("transform", "translate(" + _this.prevPosition + "," + (this.height / 2) + ")")
         .transition("text")
         .delay(delayAnimations)
-        .text(value);////this.model.time.formatDate(value, "ui"));
+        .text(this.model.time.format.ui(value));
       this.valueText
         .transition()
         .duration(delayAnimations)
@@ -701,7 +701,7 @@ const TimeSlider = Component.extend({
         .transition("text");
       this.valueText
         .attr("transform", "translate(" + new_pos + "," + (this.height / 2) + ")")
-        .text(+value);////this.model.time.formatDate(value, "ui"));
+        .text(this.model.time.format.ui(value));
     }
     _this.prevPosition = new_pos;
 
@@ -720,8 +720,8 @@ const TimeSlider = Component.extend({
     //var now = new Date();
     //if (this._updTime != null && now - this._updTime < frameRate) return;
     //this._updTime = now;
-    const persistent = !this.model.time.dragging && !this.model.time.playing;
-    _this.model.time.setValue(+time);//getModelObject("value").set(time, false, persistent); // non persistent
+    const persistent = this.dragging || this.model.time.playing;
+    _this.model.time.setValue(+time, persistent);//getModelObject("value").set(time, false, persistent); // non persistent
   },
 
 

@@ -1017,18 +1017,19 @@ export const throttle = function(func, ms) {
   let savedThis;
   let nextTime;
 
-  const __recallLast = function() {
-    if (throttled) {
+  const __recallLast = function(force, args) {
+    if (force || throttled) {
       throttled = false;
-      func.apply(savedThis, savedArgs);
+      func.apply(savedThis, args || savedArgs);
     }
   };
 
   const wrapper = function() {
 
+    wrapper.argumentsLast = savedArgs = arguments;
+
     if (nextTime > Date.now()) {
       throttled = true;
-      savedArgs = arguments;
       savedThis = this;
       return;
     }

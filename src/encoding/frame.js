@@ -1,9 +1,10 @@
 import { baseEncoding } from './baseEncoding';
 import { selection } from './selection'
-import { action, reaction, observable, computed, trace } from 'mobx'
+import { action, reaction, observable, computed, trace, toJS } from 'mobx'
 import { FULFILLED } from 'mobx-utils'
 import { assign, deepmerge, createMarkerKey, isString, applyDefaults } from '../utils';
 import { trail } from './trail';
+import { getFormat, findFormat, getIntervalAndStep } from '../format';
 //import { interpolate, extent } from 'd3';
 
 const defaultConfig = {
@@ -12,15 +13,20 @@ const defaultConfig = {
     speed: 100,
     interpolate: true,
     scale: { modelType: "frame" },
-    trails: {}
+    trails: {},
+    step: 1
 }
 
 const functions = {
     get value() {
-        let value = this.config.value;
+        let value = this.transaction.value !== this.config.value ? 
+            this.transaction.value
+            :
+            this.config.value;
+        value = this.format.data.parse(value);
         if (value != null) {
             const domain = this.scale.domain;
-            value = Math.min(Math.max(value, domain[0]), domain[1]);
+            value = this.format.data.parse(this.format.data(Math.min(Math.max(value, domain[0]), domain[1])));
         }
         return value;
     },
@@ -39,7 +45,7 @@ const functions = {
             this.startPlaying();
     },
     startPlaying: function() {
-        if (this.value == this.scale.domain[1])
+        if (this.value - this.scale.domain[1] >= 0)
             this.setValue(this.scale.domain[0]);
 
         this.setPlaying(true);
@@ -54,12 +60,13 @@ const functions = {
         speed = Math.max(0, speed);
         this.config.speed = speed;
     }),
-    setValue: action('setValue', function(value) {
+    setValue: action('setValue', function(value, isTransaction) {
         if (value != null) {
             const domain = this.scale.domain;
             value = Math.min(Math.max(value, domain[0]), domain[1]);
         }
-        this.config.value = value;
+        this.transaction.value = this.format.data(value);
+        if (!isTransaction) this.config.value = this.transaction.value;
         this.updateTrailStart();
     }),
     setValueAndStop: action('setValueAndStop', function(value) {
@@ -68,7 +75,7 @@ const functions = {
     }),
     update: action('update frame value', function() {
         if (this.playing && this.marker.dataPromise.state == FULFILLED) {
-            const newValue = this.value + 1;
+            const newValue = this.intervalAndStep.interval.offset(this.value, this.intervalAndStep.step);
             this.setValue(newValue);
             if (newValue > this.scale.domain[1])
                 this.stopPlaying();
@@ -119,14 +126,14 @@ const functions = {
         const concept = this.data.concept;
         const getOrCreateDataMap = this.getOrCreateDataMap.bind(this); // no mobx lookups
         for (let [key, row] of flatDataMap) {
-            const frameId = row[concept];
+            const frameId = +this.format.data.parse(row[concept]);
             const dataMap = getOrCreateDataMap(frameMap, frameId);
             const key = createMarkerKey(frameSpace, row);
             row[Symbol.for('key')] = key;
             dataMap.set(key, row);
         }
         if (this.interpolate)
-            this.interpolateFrames(frameMap, frameSpace);
+           this.interpolateFrames(frameMap, frameSpace);
 
         const orderEnc = this.marker.encoding.get("order");
         if (orderEnc)
@@ -196,7 +203,7 @@ const functions = {
     },
     interpolateFrames(frameMap, frameSpace) {
 
-        var frames = [...frameMap.keys()].sort();
+        var frames = [...frameMap.keys()].sort((a,b)=>a-b);
         var previousMarkerValues = new Map();
         // for each frame
         frames.forEach(frameId => {
@@ -218,7 +225,7 @@ const functions = {
                     .filter(prop => marker[prop] != null)
                     .forEach(prop => {
                         // if there is a previous value and gap is > 1 step
-                        if (previous[prop] && previous[prop].frameId + 1 < frameId) {
+                        if (previous[prop] && +this.intervalAndStep.interval.offset(previous[prop].frameId, this.intervalAndStep.step) < frameId) {
                             // interpolate and save results in frameMap
                             this.interpolatePoint(previous[prop], { frameId, value: marker[prop] })
                                 .forEach(({ frameId, value }) => {
@@ -286,10 +293,30 @@ const functions = {
                 }
             }, { name: "frame" }
         );
-    }
+    },
+    getFrame(frameId, cb) {
+
+    },
+    get unit() {
+            //const size = this.marker.dataMapCache.size;
+            const dataEntry = this.marker.dataMapCache.entries().next().value;
+            return dataEntry ? findFormat(dataEntry[1]["frame"]).unit : null;
+        }
+    ,
+    get format() {
+        return getFormat(this.unit);
+
+    },
+
+    get intervalAndStep() {
+        return getIntervalAndStep(this.unit, this.config.step);
+    },
+
 }
 
 export function frame(config) {
     applyDefaults(config, defaultConfig);
-    return assign(baseEncoding(config), functions);
+    const transaction = {};
+    applyDefaults(transaction, toJS(config))
+    return assign(baseEncoding(config), Object.assign(functions, { transaction: transaction }));
 }

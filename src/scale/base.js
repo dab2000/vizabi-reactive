@@ -1,4 +1,5 @@
 import { applyDefaults, isString } from "../utils";
+import { isDate } from "../vizabiUtils";
 
 const scales = {
     "linear": d3.scaleLinear,
@@ -81,7 +82,9 @@ export function base(config = {}, parent) {
 
             // Format time values
             // Assumption: a hook has always time in its space
-        //    if (utils.isDate(x)) return _this._space.time.formatDate(x);
+            if (isDate(x)) {
+                return _this.parent.marker.encoding.get("frame").format.ui(x);
+            }
 
             // Dealing with values that are supposed to be time
         //    if (_this.scaleType === "time" && !utils.isDate(x)) {
