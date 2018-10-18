@@ -179,7 +179,7 @@ function chart() {
         function draw() {
             const frameCfg = marker.encoding.get("frame");
             const [min, max] = frameCfg.scale.domain || [0, 1];
-            d3.select("#timecontrol").select('.frameval').text(frameCfg.value);
+            d3.select("#timecontrol").select('.frameval').text(frameCfg.config.value);
             timeslider.attr('min', min)
                 .attr('max', max)
                 .property('value', frameCfg.value)
