@@ -740,7 +740,7 @@ const TreeMenu = Component.extend({
       //if(_this.menuEntity.direction != MENU_VERTICAL) _this.menuEntity.closeAllChildren();
     });
 
-    this.translator = t=>t;//this.model.locale.getTFunction();
+    this.translator = this.model.locale.getTFunction();
 
     _this._enableSearch();
 
