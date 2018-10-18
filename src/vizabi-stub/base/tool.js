@@ -41,61 +41,61 @@ d3.selection.prototype.onLongTap = onLongTap;
 
 
 //tool model is quite simple and doesn't need to be registered
-const ToolModel = ({//Model.extend({
-  /**
-   * Initializes the tool model.
-   * @param {Tool}   the tool this tool model belongs to
-   * @param {Object} values The initial values of this model
-   */
-  init(tool, external_model) {
-    this._id = utils.uniqueId("tm");
-    this._type = "tool";
-    this._component = tool;
-    this.dimensionManager = DimensionManager(this);
-    this.dataManager = DataManager(this);
+// // const ToolModel = ({//Model.extend({
+// //   /**
+// //    * Initializes the tool model.
+// //    * @param {Tool}   the tool this tool model belongs to
+// //    * @param {Object} values The initial values of this model
+// //    */
+// //   init(tool, external_model) {
+// //     this._id = utils.uniqueId("tm");
+// //     this._type = "tool";
+// //     this._component = tool;
+// //     this.dimensionManager = DimensionManager(this);
+// //     this.dataManager = DataManager(this);
 
-    // defaults are defined on the Tool
-    // this way, each tool can have it's own default model
-    this.getClassDefaults = () => tool.default_model;
+// //     // defaults are defined on the Tool
+// //     // this way, each tool can have it's own default model
+// //     this.getClassDefaults = () => tool.default_model;
 
-    // combine listeners from tool and external page to one object
-    const listeners = utils.extend(tool.getToolListeners(), external_model.bind);
-    delete external_model.bind; // bind shouldn't go to model tree
+// //     // combine listeners from tool and external page to one object
+// //     const listeners = utils.extend(tool.getToolListeners(), external_model.bind);
+// //     delete external_model.bind; // bind shouldn't go to model tree
 
-    this._super(tool.name, external_model, null, listeners);
-  },
+// //     this._super(tool.name, external_model, null, listeners);
+// //   },
 
-  /**
-   * @return {object} Defaults of tool model and children
-   * Tool defaults overwrite other models' default
-   */
-  getDefaults() {
-    return utils.deepExtend({}, this.getSubmodelDefaults(), this.getClassDefaults());
-  },
+// //   /**
+// //    * @return {object} Defaults of tool model and children
+// //    * Tool defaults overwrite other models' default
+// //    */
+// //   getDefaults() {
+// //     return utils.deepExtend({}, this.getSubmodelDefaults(), this.getClassDefaults());
+// //   },
 
-  validate() {
+// //   validate() {
 
-    const max = 10;
-    const c = 0;
-    const _this = this;
+// //     const max = 10;
+// //     const c = 0;
+// //     const _this = this;
 
-    function validate_func(c) {
-      // ToolModel uses validate function declared on Tool so each Tool can have its own validation.
-      const model = JSON.stringify(_this.getPlainObject());
-      _this._component.validate(_this);
-      const model2 = JSON.stringify(_this.getPlainObject());
+// //     function validate_func(c) {
+// //       // ToolModel uses validate function declared on Tool so each Tool can have its own validation.
+// //       const model = JSON.stringify(_this.getPlainObject());
+// //       _this._component.validate(_this);
+// //       const model2 = JSON.stringify(_this.getPlainObject());
 
-      if (c >= max) {
-        utils.error("Max validation loop.");
-      } else if (model !== model2) {
-        validate_func(c++);
-      }
-    }
+// //       if (c >= max) {
+// //         utils.error("Max validation loop.");
+// //       } else if (model !== model2) {
+// //         validate_func(c++);
+// //       }
+// //     }
 
-    validate_func(c);
-  }
+// //     validate_func(c);
+// //   }
 
-});
+// // });
 
 
 //tool
