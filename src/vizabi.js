@@ -4,11 +4,13 @@ import { dataSourceStore } from './dataSource/dataSourceStore'
 //import { toolStore } from './tool/toolStore'
 import { isString } from './utils'
 import { observable } from 'mobx';
+import { localeStore } from './locale/localeStore';
 
 export const stores = {
     marker: markerStore,
     dataSource: dataSourceStore,
     encoding: encodingStore,
+    locale: localeStore
 //    tool: toolStore,
 }
 
@@ -20,7 +22,7 @@ export const vizabi = function(cfg) {
     dataSourceStore.setMany(config.dataSource || {});
     encodingStore.setMany(config.encoding || {});
     markerStore.setMany(config.marker || {});
-//    toolStore.setMany(config.tool || {});
+    localeStore.set(config.locale || {}, "locale");
 
     return { stores, config };
 }

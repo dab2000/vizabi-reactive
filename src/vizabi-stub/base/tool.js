@@ -7,6 +7,7 @@ import EventSource, { DefaultEvent } from "./events";
 import { observable, reaction } from "mobx";
 import { vizabi } from '../../vizabi';
 import { UI } from "../../ui/ui";
+import { Locale } from "../../locale/locale";
 
 const class_loading_first = "vzb-loading-first";
 const class_loading_data = "vzb-loading-data";
@@ -126,6 +127,10 @@ const Tool = Component.extend({
         this.trigger("resize", size)
       }, {name:"resize"});
 
+    reaction(() => this.model.locale.get("locale").id,
+      id => {
+        this.model.ui.setRTL(this.model.locale.get("locale").isRTL())
+      }, { fireImmediately: true });
   },
 
   createModel(external_model) {
@@ -358,7 +363,7 @@ const Tool = Component.extend({
     //add placeholder class
     utils.addClass(this.placeholder, class_placeholder);
     //add-remove buttonlist class
-    if (!this.model.ui || !this.model.ui.buttons || !this.model.ui.buttons.length) {
+    if (!this.model.ui || !this.model.ui.config.buttons || !this.model.ui.config.buttons.length) {
       utils.addClass(this.element, class_buttons_off);
     } else {
       utils.removeClass(this.element, class_buttons_off);

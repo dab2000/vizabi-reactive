@@ -3,6 +3,7 @@ import { deepmerge, assign, createKeyStr, applyDefaults } from "../utils";
 import { configurable } from '../configurable';
 import { trace } from 'mobx';
 import { dotToJoin, addExplicitAnd } from '../ddfquerytransform';
+import { localeStore } from '../locale/localeStore'; 
 //import { csv, interpolate } from 'd3';
 
 const defaultConfig = {
@@ -82,8 +83,8 @@ const functions = {
                     key: ["concept"],
                     value: [...concepts.map(c => c.value)]//["name", "domain", "concept_type"]
                 },
-                from: "concepts"
-
+                from: "concepts",
+                language: localeStore.get("locale").id
             })
         ));
     },

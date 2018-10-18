@@ -1,7 +1,8 @@
 //import "./styles.scss";
 import Tool from "../vizabi-stub/base/tool";
 import timeslider from "../vizabi-stub/components/timeslider/timeslider";
-import treemenu from "../vizabi-stub/components/treemenu/treemenu"
+import buttonlist from "../vizabi-stub/components/buttonlist/buttonlist";
+import treemenu from "../vizabi-stub/components/treemenu/treemenu";
 import component from "./component";
 import { createTransformer } from "mobx-utils";
 
@@ -21,7 +22,7 @@ const LineChart = Tool.extend("LineChart", {
     this.components = [{
       component,
       placeholder: ".vzb-tool-viz",
-      model: ["marker:bubble.encoding:frame", "marker:bubble", "locale", "ui"] //pass models to component
+      model: ["marker:bubble.encoding:frame", "marker:bubble", "locale:locale", "ui"] //pass models to component
     }, {
       component: timeslider,
       placeholder: ".vzb-tool-timeslider",
@@ -31,15 +32,15 @@ const LineChart = Tool.extend("LineChart", {
       component: Vizabi.Component.get("dialogs"),
       placeholder: ".vzb-tool-dialogs",
       model: ["state", "ui", "locale"]
+*/
     }, {
-      component: Vizabi.Component.get("buttonlist"),
+      component: buttonlist,
       placeholder: ".vzb-tool-buttonlist",
-      model: ["state", "ui", "locale"]
-      */
+      model: ["marker:bubble", "ui", "locale:locale"]
     }, {
       component: treemenu,
       placeholder: ".vzb-tool-treemenu",
-      model: ["marker:bubble", "marker:bubble.encoding:frame", "locale", "ui", "dataSource"]
+      model: ["marker:bubble", "marker:bubble.encoding:frame", "locale:locale", "ui", "dataSource"]
 /*    }, {
       component: Vizabi.Component.get("datawarning"),
       placeholder: ".vzb-tool-datawarning",

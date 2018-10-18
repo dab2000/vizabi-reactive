@@ -138,16 +138,21 @@ const Component = Events.extend({
       }
       return;
     }
+
+    const ready = () => {
+      let result = true;
+      if (this.model.marker && this.model.marker.dataPromise) result = result && this.model.marker.dataPromise.state == FULFILLED;
+      if (this.model.locale && this.model.locale.stringsPromise) result && this.model.locale.stringsPromise.state == FULFILLED;
+      return result;
+    }
     
-    when(() => {
-      return this.model.marker.dataPromise.state == FULFILLED
-    },
+    when(() => ready(),
       () => {
         this.loadingDone();
         this._readyOnce = true;
         this.readyOnce()
       }, {name:"readyOnce"} );
-    reaction(() => this.model.marker.dataPromise.state == FULFILLED,
+    reaction(() => ready(),
       (ready) => {
         (this._ready = ready) && this.ready();
       },{name:"ready"});
@@ -490,7 +495,7 @@ const Component = Events.extend({
   getTranslationFunction(wrap) {
     let t_func;
     try {
-      t_func = this.model.get("locale").getTFunction();
+      t_func = this.model.locale.getTFunction();
     } catch (err) {
       if (this.parent && this.parent !== this) {
         t_func = this.parent.getTranslationFunction();

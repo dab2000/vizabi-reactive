@@ -345,7 +345,7 @@ const LCComponent = Component.extend("linechart", {
 
   getFrame(time, cb) {
     const timeConfig = this.model.marker.encoding.get("frame");
-    return cb(time ? timeConfig.frameMap.get(time) : timeConfig.frameMap, time);
+    return cb(time ? timeConfig.frameMap.get(+time) : timeConfig.frameMap, time);
   },
 
   getCompoundLabelText(labelObj, keys) {
@@ -357,7 +357,7 @@ const LCComponent = Component.extend("linechart", {
     const conceptPropsY = _this.model.marker.encoding.get("y").data.conceptProps;
     const conceptPropsX = _this.model.marker.encoding.get("x").data.conceptProps;
     const conceptPropsC = _this.model.marker.encoding.get("color").data.conceptProps;
-    this.translator = (t) => t;//this.model.locale.getTFunction();
+    this.translator = this.model.locale.getTFunction();
 
     this.strings = {
       title: {
@@ -712,7 +712,7 @@ const LCComponent = Component.extend("linechart", {
     const _this = this;
     //const values = this.values;
     //const KEY = this.KEY;
-    const isRTL = false;////this.model.locale.isRTL();
+    const isRTL = this.model.locale.isRTL();
 
     const padding = 2;
 
@@ -772,7 +772,7 @@ const LCComponent = Component.extend("linechart", {
         toolMargin: this.margin,
         limitMaxTickNumber: 6,
         viewportLength: this.height,
-        ////formatter: this.model.marker.axis_y.getTickFormatter()
+        formatter: this.model.marker.encoding.get("x").scale.tickFormatter
       });
 
     this.xAxis.scale(this.xScale)

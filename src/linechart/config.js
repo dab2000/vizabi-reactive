@@ -1,37 +1,4 @@
 export const config = {
-    //tool: {
-        ui: {
-            "chart": {
-                "curve": "curveMonotoneX",
-                "labels": {
-                    "min_number_of_entities_when_values_hide": 2 //values hide when showing 2 entities or more
-                },
-                "whenHovering": {
-                    "hideVerticalNow": false,
-                    "showProjectionLineX": true,
-                    "showProjectionLineY": true,
-                    "higlightValueX": true,
-                    "higlightValueY": true,
-                    "showTooltip": false
-                }
-            },
-            datawarning: {
-                doubtDomain: [],
-                doubtRange: []
-            },
-            "buttons": ["colors", "find", "moreoptions", "fullscreen", "presentation"],
-            "dialogs": {
-                "popup": ["colors", "find", "moreoptions"],
-                "sidebar": ["colors", "find"],
-                "moreoptions": ["opacity", "speed", "axes", "colors", "presentation", "about"],
-                "dialog": {"find": {"panelMode": "show"}}
-            },
-            "presentation": false
-        },
-        locale: {
-
-    //    }
-    },
     dataSource: {
         /*gapcsv: {
             type: "ddfcsv",
@@ -163,6 +130,7 @@ export const config = {
                     }
                 }*/
             },
+            important: ["x", "y"],
             encoding: {
                 "selected": {
                     modelType: "selection",
@@ -175,8 +143,8 @@ export const config = {
                     },
                     scale: {
                         modelType: "frame",
-                        type: "linear"
-                    }
+                        domain: ['1950', '1980']
+                        }
                 },
                 "y": {
                     data: {
@@ -238,9 +206,43 @@ export const config = {
                                 markers: {}
                             }
                         }
+                    },
+                    scale: {
+                        domain: ['1950', '1980']
                     }
                 }
             }
         }
+    },
+    ui: {
+        "chart": {
+            "curve": "curveMonotoneX",
+            "labels": {
+                "min_number_of_entities_when_values_hide": 2 //values hide when showing 2 entities or more
+            },
+            "whenHovering": {
+                "hideVerticalNow": false,
+                "showProjectionLineX": true,
+                "showProjectionLineY": true,
+                "higlightValueX": true,
+                "higlightValueY": true,
+                "showTooltip": false
+            }
+        },
+        datawarning: {
+            doubtDomain: [],
+            doubtRange: []
+        },
+        "buttons": ["colors", "find", "moreoptions", "fullscreen", "presentation"],
+        "dialogs": {
+            "popup": ["colors", "find", "moreoptions"],
+            "sidebar": ["colors", "find"],
+            "moreoptions": ["opacity", "speed", "axes", "colors", "presentation", "about"],
+            "dialog": {"find": {"panelMode": "show"}}
+        },
+        "presentation": false
+    },
+    locale: {
+        id: "ar-SA"
     }
 }
