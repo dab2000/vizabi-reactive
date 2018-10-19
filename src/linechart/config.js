@@ -243,6 +243,6 @@ export const config = {
         "presentation": false
     },
     locale: {
-        id: "ar-SA"
+        id: "en"
     }
 }

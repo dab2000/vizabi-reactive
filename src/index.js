@@ -31,7 +31,39 @@ spy((event) => {
     }
 })
 */
+function setupLanguageControl() {
+    const languages = ["en", "ar-SA"];
 
+    const langSel = d3.select('#languagecontrol')
+        .append('select')
+        .attr('id', 'langSel');
+
+
+    langSel
+        .on("change", function() {
+            const langId = d3.select(this.options[this.selectedIndex]).datum();
+            locale.config.id = langId;
+        });
+
+    const langOptUpd = langSel
+        .selectAll('option')
+        .data(languages)
+        .enter()
+        .append('option')
+        .text(d => d);
+
+
+
+    autorun(()=>
+        langOptUpd.property('selected', function(d) {
+            return locale.config.id === d;
+        })
+    )
+
+}
+
+const locale = viz.stores.locale.get("locale");
+setupLanguageControl();
 //autorun(chart);
 
 chart();

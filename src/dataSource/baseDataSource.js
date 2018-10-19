@@ -78,13 +78,14 @@ const functions = {
         ]));
     },
     get conceptsPromise() {
+        const langId = localeStore.get("locale").id;
         return fromPromise(this.conceptsAvailabilityPromise.then(concepts => this.query({
                 select: {
                     key: ["concept"],
                     value: [...concepts.map(c => c.value)]//["name", "domain", "concept_type"]
                 },
                 from: "concepts",
-                language: localeStore.get("locale").id
+                language: langId
             })
         ));
     },

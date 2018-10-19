@@ -5,9 +5,9 @@ import EventSource, { DefaultEvent } from "./events";
 //import DimensionManager from "base/dimensionmanager";
 //import DataManager from "base/datamanager";
 import { observable, reaction } from "mobx";
+import { FULFILLED } from "mobx-utils";
 import { vizabi } from '../../vizabi';
 import { UI } from "../../ui/ui";
-import { Locale } from "../../locale/locale";
 
 const class_loading_first = "vzb-loading-first";
 const class_loading_data = "vzb-loading-data";
@@ -127,10 +127,12 @@ const Tool = Component.extend({
         this.trigger("resize", size)
       }, {name:"resize"});
 
-    reaction(() => this.model.locale.get("locale").id,
-      id => {
+    reaction(() => this.model.locale.get("locale").stringsPromise.state == FULFILLED,
+      (translated) => {
+        if (!translated) return;
+        this.translateStrings();
         this.model.ui.setRTL(this.model.locale.get("locale").isRTL())
-      }, { fireImmediately: true });
+      });
   },
 
   createModel(external_model) {
@@ -156,6 +158,15 @@ const Tool = Component.extend({
   
   getStores() {
     return this.model;
+  },
+
+  getTranslationFunction(wrap) {
+    const locale = this.model.locale.get("locale");
+    const t_func = locale ? locale.getTFunction() : s => s;
+  
+    return wrap ?
+      this._translatedStringFunction(t_func) :
+    t_func;
   },
 
   getToolTemplate() {

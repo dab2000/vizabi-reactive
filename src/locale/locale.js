@@ -156,6 +156,10 @@ export function locale(config = {}, parent) {
 
   isRTL() {
     return (rtlLocales.indexOf(this.id) !== -1);
+  },
+
+  get dataPromise() {
+    return this.stringsPromise;
   }
 
 }};

@@ -4,8 +4,8 @@ import Events from "./events";
 //import globals from "./globals";
 
 import { close as iconClose } from "./iconset";
-import { observable, reaction, when } from "mobx";
-import { FULFILLED } from "mobx-utils";
+import { observable, reaction, when, computed } from "mobx";
+import { FULFILLED, fromPromise } from "mobx-utils";
 const class_loading_first = "vzb-loading-first";
 const class_loading_data = "vzb-loading-data";
 const class_error = "vzb-error";
@@ -139,20 +139,17 @@ const Component = Events.extend({
       return;
     }
 
-    const ready = () => {
-      let result = true;
-      if (this.model.marker && this.model.marker.dataPromise) result = result && this.model.marker.dataPromise.state == FULFILLED;
-      if (this.model.locale && this.model.locale.stringsPromise) result && this.model.locale.stringsPromise.state == FULFILLED;
-      return result;
-    }
+    const readyPromise = computed(() => {
+      return fromPromise(this.getReadyPromise());
+    });
     
-    when(() => ready(),
+    when(() => readyPromise.get().state == FULFILLED,
       () => {
         this.loadingDone();
         this._readyOnce = true;
         this.readyOnce()
       }, {name:"readyOnce"} );
-    reaction(() => ready(),
+    reaction(() => readyPromise.get().state == FULFILLED,
       (ready) => {
         (this._ready = ready) && this.ready();
       },{name:"ready"});
@@ -225,6 +222,12 @@ const Component = Events.extend({
     utils.error(errorLog);
   },
 
+  getReadyPromise() {
+    return Promise.all(
+      //map data connected promises
+      this.model_expects.map(me => this.model[me.name].dataPromise).filter(f => f)
+    );
+  },
 
   setReady(value) {
     if (!this._readyOnce) {
