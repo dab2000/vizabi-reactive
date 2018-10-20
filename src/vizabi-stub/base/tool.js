@@ -160,6 +160,13 @@ const Tool = Component.extend({
     return this.model;
   },
 
+  getReadyPromise() {
+    return Promise.all(
+      //map data connected promises
+      this.components.map(c => c.getReadyPromise())
+    );
+  },
+
   getTranslationFunction(wrap) {
     const locale = this.model.locale.get("locale");
     const t_func = locale ? locale.getTFunction() : s => s;
@@ -260,20 +267,20 @@ const Tool = Component.extend({
   startLoading() {
     this._super();
 
-    this.loadingDone();
-    // Promise.all([
-    //   this.model.startPreload(),
-    //   this.startPreload()
-    // ])
-    //   .then(this.afterPreload.bind(this))
-    //   .then(this.loadSplashScreen.bind(this))
-    //   .then(() => utils.delay(300))
-    //   .then(this.model.startLoading.bind(this.model))
-    //   .then(this.finishLoading.bind(this))
-    //   .catch(error => {
-    //     utils.error("error in tool promise chain");
-    //     this.model.triggerLoadError(error);
-    //   });
+  //   //this.loadingDone();
+  //   // Promise.all([
+  //   //   this.model.startPreload(),
+  //   //   this.startPreload()
+  //   // ])
+  //   //   .then(this.afterPreload.bind(this))
+  //   //   .then(this.loadSplashScreen.bind(this))
+  //   //   .then(() => utils.delay(300))
+  //   //   .then(this.model.startLoading.bind(this.model))
+  //   //   .then(this.finishLoading.bind(this))
+  //   //   .catch(error => {
+  //   //     utils.error("error in tool promise chain");
+  //   //     this.model.triggerLoadError(error);
+  //   //   });
 
   },
 

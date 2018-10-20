@@ -4,7 +4,7 @@ import Events from "./events";
 //import globals from "./globals";
 
 import { close as iconClose } from "./iconset";
-import { observable, reaction, when, computed } from "mobx";
+import { observable, reaction, when, computed, decorate } from "mobx";
 import { FULFILLED, fromPromise } from "mobx-utils";
 const class_loading_first = "vzb-loading-first";
 const class_loading_data = "vzb-loading-data";
@@ -19,6 +19,9 @@ const Component = Events.extend({
    * @param {Object} parent Reference to tool
    */
   init(config, parent) {
+
+    this.readyPromise = computed(() => fromPromise(this.getReadyPromise()));
+
     this._id = this._id || utils.uniqueId("c");
     this._ready = false;
     this._readyOnce = false;
@@ -128,48 +131,41 @@ const Component = Events.extend({
    * @return {[type]} [description]
    */
   startLoading() {
-    if (!this.model.marker) {
-      if (!this._readyOnce) {
-        this.loadingDone();
-        this._readyOnce = true;
-        this._ready = true;
-        this.readyOnce();
-        this.ready();
-      }
-      return;
-    }
-
-    const readyPromise = computed(() => {
-      return fromPromise(this.getReadyPromise());
-    });
-    
-    when(() => readyPromise.get().state == FULFILLED,
+ 
+    when(() => this.readyPromise.get().state == FULFILLED,
       () => {
         this.loadingDone();
         this._readyOnce = true;
-        this.readyOnce()
+        this.readyOnce();
       }, {name:"readyOnce"} );
-    reaction(() => readyPromise.get().state == FULFILLED,
+    reaction(() => this.readyPromise.get().state == FULFILLED,
       (ready) => {
-        (this._ready = ready) && this.ready();
+        (this._ready = ready)
+        if (ready) {
+          this.loadingDone();
+          this.ready();
+        } else {
+          this.loading();
+        }
       },{name:"ready"});
 
-    // if a componente's model is ready, the component is ready
-    // this.model.on("ready", () => {
-    //   this.loadingDone();
-    // });
+  },
 
-    // if (!(this.model && this.model.isLoading())) {
-    //   this.loadingDone();
-    // }
-
-
+  loading() {
+    utils.addClass(this.placeholder, class_loading_first);
   },
 
   loadingDone() {
     utils.removeClass(this.placeholder, class_loading_first);
     utils.removeClass(this.placeholder, class_loading_data);
     //this.setReady();
+  },
+
+  getReadyPromise() {
+    return Promise.all(
+      //map data connected promises
+      this.model_expects.map(me => this.model[me.name].dataPromise).filter(f => f)
+    );
   },
 
   /**
@@ -220,13 +216,6 @@ const Component = Events.extend({
     this.errorMessageEl.select(".vzb-error-message-outro").html(translator(crashOutro, template).replace("mailto", mailto));
 
     utils.error(errorLog);
-  },
-
-  getReadyPromise() {
-    return Promise.all(
-      //map data connected promises
-      this.model_expects.map(me => this.model[me.name].dataPromise).filter(f => f)
-    );
   },
 
   setReady(value) {
