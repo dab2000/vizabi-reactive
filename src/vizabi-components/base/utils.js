@@ -1720,3 +1720,49 @@ export function mapToObj(map) {
   map.forEach((v, k) => { obj[k] = v });
   return obj;
 };
+
+// code from https://github.com/TehShrike/is-mergeable-object
+function isMergeableObject(value) {
+  return isNonNullObject(value) &&
+      !isSpecial(value)
+}
+
+function isNonNullObject(value) {
+  return !!value && typeof value === 'object'
+}
+
+function isSpecial(value) {
+  var stringValue = Object.prototype.toString.call(value)
+
+  return stringValue === '[object RegExp]' ||
+      stringValue === '[object Date]' ||
+      isReactElement(value)
+}
+
+// see https://github.com/facebook/react/blob/b5ac963fb791d1298e7f396236383bc955f916c1/src/isomorphic/classic/element/ReactElement.js#L21-L25
+var canUseSymbol = typeof Symbol === 'function' && Symbol.for
+var REACT_ELEMENT_TYPE = canUseSymbol ? Symbol.for('react.element') : 0xeac7
+
+function isReactElement(value) {
+  return value.$$typeof === REACT_ELEMENT_TYPE
+}
+
+export function deepclone(object) {
+  return deepmerge({}, object);
+};
+
+export function applyDefaults(config, defaults) {
+  const defaultProps = Object.keys(defaults);
+  defaultProps.forEach(prop => {
+      if (!config.hasOwnProperty(prop))
+          if (isMergeableObject(defaults[prop]))
+              config[prop] = deepclone(defaults[prop]); // object
+          else
+              config[prop] = defaults[prop]; // non object, e.g. null
+      else if (isMergeableObject(defaults[prop]))
+          if (isMergeableObject(config[prop]))
+              applyDefaults(config[prop], defaults[prop]);
+          else
+              config[prop] = deepclone(defaults[prop]);
+  })
+};

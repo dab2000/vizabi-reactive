@@ -1,6 +1,5 @@
 import { applyDefaults, assign } from "../utils";
 import { base } from "./base";
-import { timeStamp } from "../vizabi-stub/base/utils";
 
 const defaultConfig = {}
 

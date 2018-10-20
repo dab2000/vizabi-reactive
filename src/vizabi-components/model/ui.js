@@ -1,6 +1,4 @@
-import { applyDefaults } from "../utils";
-import * as utils from "../vizabiUtils";
-import { extendObservable } from "mobx";
+import * as utils from "../base/utils";
 
 //classes are vzb-portrait, vzb-landscape...
 const class_prefix = "vzb-";
@@ -27,7 +25,7 @@ const defaultConfig = {
 //const UI = Model.extend({
 export function UI(config = {}, parent) {
 
-  applyDefaults(config, defaultConfig);
+  utils.applyDefaults(config, defaultConfig);
 
   return {
     config,

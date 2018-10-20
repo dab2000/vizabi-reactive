@@ -11,12 +11,12 @@
 //   }
 // } = Vizabi;
 
-import Component from "../vizabi-stub/base/component";
-import * as utils from "../vizabi-stub/base/utils";
-import axisSmart from "../vizabi-stub/helpers/d3.axisWithLabelPicker";
-import collisionResolver from "../vizabi-stub/helpers/d3.collisionResolver";
+import Component from "../vizabi-components/base/component";
+import * as utils from "../vizabi-components/base/utils";
+import axisSmart from "../vizabi-components/helpers/d3.axisWithLabelPicker";
+import collisionResolver from "../vizabi-components/helpers/d3.collisionResolver";
 import { warn as iconWarn,
-  question as iconQuestion } from "../vizabi-stub/base/iconset";
+  question as iconQuestion } from "../vizabi-components/base/iconset";
 import { autorun, action, when, reaction, spy, observable } from 'mobx';
 import { FULFILLED } from "mobx-utils";
 

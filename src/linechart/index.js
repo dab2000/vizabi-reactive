@@ -1,8 +1,8 @@
 //import "./styles.scss";
-import Tool from "../vizabi-stub/base/tool";
-import timeslider from "../vizabi-stub/components/timeslider/timeslider";
-import buttonlist from "../vizabi-stub/components/buttonlist/buttonlist";
-import treemenu from "../vizabi-stub/components/treemenu/treemenu";
+import Tool from "../vizabi-components/base/tool";
+import timeslider from "../vizabi-components/components/timeslider/timeslider";
+import buttonlist from "../vizabi-components/components/buttonlist/buttonlist";
+import treemenu from "../vizabi-components/components/treemenu/treemenu";
 import component from "./component";
 import { createTransformer } from "mobx-utils";
 

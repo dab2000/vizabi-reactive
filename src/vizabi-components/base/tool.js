@@ -7,7 +7,7 @@ import EventSource, { DefaultEvent } from "./events";
 import { observable, reaction } from "mobx";
 import { FULFILLED } from "mobx-utils";
 import { vizabi } from '../../vizabi';
-import { UI } from "../../ui/ui";
+import { UI } from "../model/ui";
 
 const class_loading_first = "vzb-loading-first";
 const class_loading_data = "vzb-loading-data";
