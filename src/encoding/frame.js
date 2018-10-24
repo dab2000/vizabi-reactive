@@ -18,15 +18,14 @@ const defaultConfig = {
 }
 
 const functions = {
-    get value() {
-        let value = this.transaction.value !== this.config.value ? 
-            this.transaction.value
+    get value() {    
+        let value = this.transaction.value == this.config.value ? 
+            this.format.data.parse(this.config.value)
             :
-            this.config.value;
-        value = this.format.data.parse(value);
+            this.transaction.value;
         if (value != null) {
             const domain = this.scale.domain;
-            value = this.format.data.parse(this.format.data(Math.min(Math.max(value, domain[0]), domain[1])));
+            value = new Date(Math.min(Math.max(value, domain[0]), domain[1]));
         }
         return value;
     },
@@ -63,11 +62,11 @@ const functions = {
     setValue: action('setValue', function(value, isTransaction) {
         if (value != null) {
             const domain = this.scale.domain;
-            value = Math.min(Math.max(value, domain[0]), domain[1]);
+            value = new Date(Math.min(Math.max(value, domain[0]), domain[1]));
         }
-        this.transaction.value = this.format.data(value);
-        if (!isTransaction) this.config.value = this.transaction.value;
-        this.updateTrailStart();
+        this.transaction.value = value;
+        if (!isTransaction) this.config.value = this.transaction.value = this.format.data(this.transaction.value);
+        //this.updateTrailStart();
     }),
     setValueAndStop: action('setValueAndStop', function(value) {
         this.stopPlaying();
@@ -203,8 +202,9 @@ const functions = {
     },
     interpolateFrames(frameMap, frameSpace) {
 
-        var frames = [...frameMap.keys()].sort((a,b)=>a-b);
-        var previousMarkerValues = new Map();
+        const frames = [...frameMap.keys()].sort((a,b)=>a-b);
+        const previousMarkerValues = new Map();
+        const frameIdOffset = this.intervalAndStep ? t => +this.intervalAndStep.interval.offset(t, this.intervalAndStep.step) : t => t + 1;
         // for each frame
         frames.forEach(frameId => {
             // for each marker in that frame
@@ -225,9 +225,9 @@ const functions = {
                     .filter(prop => marker[prop] != null)
                     .forEach(prop => {
                         // if there is a previous value and gap is > 1 step
-                        if (previous[prop] && +this.intervalAndStep.interval.offset(previous[prop].frameId, this.intervalAndStep.step) < frameId) {
+                        if (previous[prop] && frameIdOffset(previous[prop].frameId) < frameId) {
                             // interpolate and save results in frameMap
-                            this.interpolatePoint(previous[prop], { frameId, value: marker[prop] })
+                            this.interpolatePoint(previous[prop], { frameId, value: marker[prop] }, frameIdOffset)
                                 .forEach(({ frameId, value }) => {
                                     // could maybe be optimized with batch updating all interpolations
                                     let markerObj;
@@ -269,14 +269,14 @@ const functions = {
             }
         });
     },
-    interpolatePoint(start, end) {
+    interpolatePoint(start, end, offset) {
         const int = d3.interpolate(start.value, end.value);
+        const base = start.frameId;
         const delta = end.frameId - start.frameId;
         const intVals = [];
-        for (let i = 1; i < delta; i++) {
-            const frameId = start.frameId + i;
-            const value = int(i / delta);
-            intVals.push({ frameId, value })
+        for (let i = offset(base), j = end.frameId; i < j; i = offset(i)) {
+            const value = int((i - base) / delta);
+            intVals.push({ frameId: i, value })
         }
         return intVals;
     },
@@ -295,8 +295,32 @@ const functions = {
         );
     },
     getFrame(frameId, cb) {
+        if (!frameId && frameId !== 0) return cb(this.frameMap, frameId);
+        if (this.frameMap.has(+frameId)) return cb(this.frameMap.get(+frameId), frameId);
 
-    },
+        const frames = [...this.frameMap.keys()].sort((a,b)=>a-b);
+        if (!frames.length) return;
+        const frameIdOffset = this.intervalAndStep ? t => +this.intervalAndStep.interval.offset(t, this.intervalAndStep.step) : t => t + 1;
+        const lastIndex = d3.bisectLeft(frames, +frameId);
+        const firstIndex = lastIndex - 1;
+        const frameLast = this.frameMap.get(frames[lastIndex]);
+        const frameFirst = this.frameMap.get(frames[firstIndex]);
+        const markerMap = new Map();
+        for (let [markerKey, marker] of frameFirst) {
+            const markerObj = {};
+            markerMap.set(markerKey, markerObj);
+            Object.keys(marker)
+            // ignore properties without data
+            .filter(prop => marker[prop] != null)
+            .forEach(prop => {
+                markerObj[prop] = this.interpolatePoint({ 
+                    frameId: frames[firstIndex], value: marker[prop] }, 
+                    { frameId: frames[lastIndex], value: frameLast.get(markerKey)[prop] },
+                    (i) => ({[frames[firstIndex]]: +frameId, [frameId]: frames[lastIndex]})[i])[0].value;    
+            });
+        }
+        return cb(markerMap, frameId);
+    },    
     get unit() {
             //const size = this.marker.dataMapCache.size;
             const dataEntry = this.marker.dataMapCache.entries().next().value;
@@ -309,7 +333,7 @@ const functions = {
     },
 
     get intervalAndStep() {
-        return getIntervalAndStep(this.unit, this.config.step);
+        return this.unit ? getIntervalAndStep(this.unit, this.config.step) : null;
     },
 
 }
