@@ -49,7 +49,7 @@ export function base(config = {}, parent) {
                 return this.config.range
 
             // default
-            return (this.type == "ordinal") ?
+            return (this.type == this.ordinalScale) ?
                 d3.schemeCategory10 : [0, 1];
         },
         get domain() {

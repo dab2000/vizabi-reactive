@@ -176,6 +176,7 @@ export const config = {
                     }
                 },
                 "color": {
+                    modelType: "color",
                     data: {
                         space: ["geo"],
                         concept: "world_4region"

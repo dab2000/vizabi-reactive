@@ -96,8 +96,46 @@ const functions = {
         if (this.conceptsPromise.state != FULFILLED) return new Map();
         else return new Map([
             ["_default", { concept: "_default", concept_type: "string", use: "constant", scales: ["ordinal"], tags: "_root" }], 
-            ...this.conceptsPromise.value.map(c => [c.concept, c])
+            ...this.conceptsPromise.value.map(c => [c.concept, this._processConcept(c)])
         ]);
+    },
+    _processConcept(concept) {
+        try {
+            concept["color"] = (concept.color || null) && JSON.parse(concept.color);
+        }
+        catch {
+            concept["color"] = null;
+        }
+        try {
+            concept["scales"] = (concept.scales || null) && JSON.parse(concept.scales);
+        }
+        catch {
+            concept["scales"] = null;
+        }
+        if (!concept.scales) {
+            switch (concept.concept_type) {
+              case "measure": concept.scales = ["linear", "log"]; break;
+              case "string": concept.scales = ["ordinal"]; break;
+              case "entity_domain": concept.scales = ["ordinal"]; break;
+              case "entity_set": concept.scales = ["ordinal"]; break;
+              case "boolean": concept.scales = ["ordinal"]; break;
+              case "time": concept.scales = ["time"]; break;
+              default: concept.scales = ["linear", "log"];
+            }
+        }
+        if (!concept.interpolation) {
+            if (concept.concept_type == "measure") {
+                concept["interpolation"] = concept.scales && concept.scales[0] == "log" ? "exp" : "linear";
+            } else if (concept.concept_type == "time") {
+                concept["interpolation"] = "linear";
+            } else {
+                concept["interpolation"] = "stepMiddle";
+            }
+        }
+        concept["name"] = concept.name || concept.concept || "";
+        concept["name_catalog"] = concept.name_catalog || "";
+        concept["name_short"] = concept.name_short || concept.name || concept.concept || "";
+        return concept;
     },
     getConcept(conceptId) {
         if (conceptId == "concept_type" || conceptId.indexOf('is--') === 0)

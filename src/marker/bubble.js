@@ -8,6 +8,7 @@ const defaultConfig = {
     encoding: {
         x: { scale: { modelType: "x" } },
         y: { scale: { modelType: "y" } },
+        color: { scale: { modelType: "color" } },
         size: { scale: { modelType: "size" } }
     }
 }
