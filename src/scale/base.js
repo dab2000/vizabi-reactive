@@ -36,7 +36,7 @@ export function base(config = {}, parent) {
             let scale;
             if (scales[this.config.type])
                 scaleType = this.config.type;
-            else if (concept.scales && (scale = JSON.parse(concept.scales)[0]) && scales[scale])
+            else if (concept.scales && (scale = concept.scales[0]) && scales[scale])
                 scaleType = scale;
             else if (["entity_domain", "entity_set", "string"].includes(concept.concept_type))
                 scaleType = this.ordinalScale;
