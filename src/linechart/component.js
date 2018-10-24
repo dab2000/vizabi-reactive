@@ -344,8 +344,7 @@ const LCComponent = Component.extend("linechart", {
   },
 
   getFrame(time, cb) {
-    const timeConfig = this.model.marker.encoding.get("frame");
-    return cb(time ? timeConfig.frameMap.get(+time) : timeConfig.frameMap, time);
+    return this.model.marker.encoding.get("frame").getFrame(time, cb);
   },
 
   getCompoundLabelText(labelObj, keys) {
@@ -552,15 +551,12 @@ const LCComponent = Component.extend("linechart", {
   },
 
   getColorsByValue(colorValue) {
-    const color = colorValue != null ? this.cScale(colorValue) : this.COLOR_WHITEISH;
     return { 
-      color,
-      colorShadow: d3.rgb(color).darker(0.5).toString()
-      // // color: colorValue != null ? this.cScale(colorValue) : this.COLOR_WHITEISH,
-      // // colorShadow: colorValue != null ? this.model.marker.color.getColorShade({
-      // //     colorID: colorValue,
-      // //     shadeID: "shade"
-      // //   }) : this.COLOR_WHITEISH_SHADE
+      color: colorValue != null ? this.cScale(colorValue) : this.COLOR_WHITEISH,
+      colorShadow: colorValue != null ? this.model.marker.encoding.get("color").getColorShade({
+          colorID: colorValue,
+          shadeID: "shade"
+        }) : this.COLOR_WHITEISH_SHADE
     }
   },
 
@@ -569,7 +565,7 @@ const LCComponent = Component.extend("linechart", {
     const dataKeys = this.dataKeys = this.model.marker.getDataKeysPerHook();
     const valuesColor = this.values.color;
     
-    this.cScale = this.model.marker.color.getScale();
+    this.cScale = this.model.marker.encoding.get("color").scale.d3Scale;
     
     this.entityLabels.each(function(d, index) {
       const entity = d3.select(this);
@@ -1091,12 +1087,13 @@ const LCComponent = Component.extend("linechart", {
     this.getFrame(resolvedTime, data => {
       if (!_this._frameIsValid(data)) return;
       //const nearestKey = _this.getNearestKey(_this.yScale.invert(mousePos), data.axis_y);
-      const nearestKey = _this.getNearestKey(mousePos, _this.dataHash, data.axis_y, _this.yScale.bind(_this));
-      resolvedValue = data.axis_y[nearestKey];
+      const nearestKey = _this.getNearestKey(mousePos, _this.dataHash, utils.mapToObj(data), "y", _this.yScale.bind(_this));
+      resolvedValue = data.get(nearestKey)["y"];
       me = _this.dataHash[nearestKey];
-      if (!_this.model.marker.isHighlighted(me)) {
-        _this.model.marker.clearHighlighted();
-        _this.model.marker.highlightMarker(me);
+      const highlightedEnc = _this.model.marker.encoding.get("highlighted");
+      if (!highlightedEnc.data.filter.has(me)) {
+        highlightedEnc.data.filter.clear();
+        highlightedEnc.data.filter.set(me);
       }
       _this.hoveringNow = me;
 
@@ -1105,7 +1102,7 @@ const LCComponent = Component.extend("linechart", {
       const scaledTime = _this.xScale(resolvedTime);
       const scaledValue = _this.yScale(resolvedValue);
 
-      if (_this.model.ui.chart.whenHovering.showTooltip) {
+      if (_this.model.ui.config.chart.whenHovering.showTooltip) {
         //position tooltip
         _this.tooltip
         //.style("right", (_this.width - scaledTime + _this.margin.right ) + "px")
@@ -1116,18 +1113,18 @@ const LCComponent = Component.extend("linechart", {
       }
 
       // bring the projection lines to the hovering point
-      if (_this.model.ui.chart.whenHovering.hideVerticalNow) {
+      if (_this.model.ui.config.chart.whenHovering.hideVerticalNow) {
         _this.verticalNow.style("opacity", 0);
       }
 
-      if (_this.model.ui.chart.whenHovering.showProjectionLineX) {
+      if (_this.model.ui.config.chart.whenHovering.showProjectionLineX) {
         _this.projectionX
           .style("opacity", 1)
           .attr("y2", scaledValue)
           .attr("x1", scaledTime)
           .attr("x2", scaledTime);
       }
-      if (_this.model.ui.chart.whenHovering.showProjectionLineY) {
+      if (_this.model.ui.config.chart.whenHovering.showProjectionLineY) {
         _this.projectionY
           .style("opacity", 1)
           .attr("y1", scaledValue)
@@ -1135,11 +1132,11 @@ const LCComponent = Component.extend("linechart", {
           .attr("x1", scaledTime);
       }
 
-      if (_this.model.ui.chart.whenHovering.higlightValueX) _this.xAxisEl.call(
+      if (_this.model.ui.config.chart.whenHovering.higlightValueX) _this.xAxisEl.call(
         _this.xAxis.highlightValue(resolvedTime).highlightTransDuration(0)
       );
 
-      if (_this.model.ui.chart.whenHovering.higlightValueY) _this.yAxisEl.call(
+      if (_this.model.ui.config.chart.whenHovering.higlightValueY) _this.yAxisEl.call(
         _this.yAxis.highlightValue(resolvedValue).highlightTransDuration(0)
       );
 
@@ -1161,7 +1158,7 @@ const LCComponent = Component.extend("linechart", {
       _this.xAxisEl.call(_this.xAxis.highlightValue(_this.time));
       _this.yAxisEl.call(_this.yAxis.highlightValue("none"));
 
-      _this.model.marker.clearHighlighted();
+      _this.model.marker.encoding.get("highlighted").data.filter.clear();
 
       _this.hoveringNow = null;
     }, 300);
@@ -1277,7 +1274,7 @@ const LCComponent = Component.extend("linechart", {
   /**
    * Returns key from obj which value from values has the smallest difference with val
    */
-  getNearestKey(val, obj, values, fn) {
+  getNearestKey(val, obj, values, propName, fn) {
     //const startTime = new Date();
     const KEYS = this.KEYS;
     let keys = Object.keys(obj);
@@ -1291,7 +1288,7 @@ const LCComponent = Component.extend("linechart", {
     for (let i = 1; i < keys.length; i++) {
       let key = keys[i];
       
-      if (Math.abs((fn ? fn(values[key]) : values[key]) - val) < Math.abs((fn ? fn(values[resKey]) : values[resKey]) - val)) {
+      if (Math.abs((fn ? fn(values[key][propName]) : values[key][propName]) - val) < Math.abs((fn ? fn(values[resKey][propName]) : values[resKey][propName]) - val)) {
         resKey = key;
       }
     }

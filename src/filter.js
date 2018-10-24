@@ -45,6 +45,9 @@ export function filter(config = {}, parent) {
             this.config.markers = mapToObj(this.markers);
             return success;
         }),
+        clear: action("clearFilter", function(d) {
+            this.config.markers = {};
+        }),
         toggle(d) {
             const key = this.getKey(d);
             const del = this.delete(key);
