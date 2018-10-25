@@ -1,15 +1,10 @@
 //import "./styles.scss";
-import Tool from "../vizabi-components/base/tool";
-import timeslider from "../vizabi-components/components/timeslider/timeslider";
-import buttonlist from "../vizabi-components/components/buttonlist/buttonlist";
-import treemenu from "../vizabi-components/components/treemenu/treemenu";
 import component from "./component";
-import { createTransformer } from "mobx-utils";
 
 //const VERSION_INFO = { version: __VERSION, build: __BUILD };
 
 // LINE CHART TOOL
-const LineChart = Tool.extend("LineChart", {
+const LineChart = Vizabi.Tool.extend("LineChart", {
   /**
    * Initialized the tool
    * @param {Object} placeholder Placeholder element for the tool
@@ -24,21 +19,20 @@ const LineChart = Tool.extend("LineChart", {
       placeholder: ".vzb-tool-viz",
       model: ["marker:bubble.encoding:frame", "marker:bubble", "locale:locale", "ui"] //pass models to component
     }, {
-      component: timeslider,
+      component: Vizabi.Component.get("timeslider"),
       placeholder: ".vzb-tool-timeslider",
       model: ["marker:bubble.encoding:frame", "marker:bubble", "ui"],
       ui: { show_value_when_drag_play: true, axis_aligned: false }
-/*    }, {
+    }, {
       component: Vizabi.Component.get("dialogs"),
       placeholder: ".vzb-tool-dialogs",
-      model: ["state", "ui", "locale"]
-*/
+      model: [".", "ui", "locale"]
     }, {
-      component: buttonlist,
+      component: Vizabi.Component.get("buttonlist"),
       placeholder: ".vzb-tool-buttonlist",
       model: ["marker:bubble", "ui", "locale:locale"]
     }, {
-      component: treemenu,
+      component: Vizabi.Component.get("treemenu"),
       placeholder: ".vzb-tool-treemenu",
       model: ["marker:bubble", "marker:bubble.encoding:frame", "locale:locale", "ui", "dataSource"]
 /*    }, {

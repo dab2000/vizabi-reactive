@@ -1,5 +1,5 @@
-import * as utils from "./utils";
-import Class from "./class";
+import * as utils from "base/utils";
+import Class from "base/class";
 
 let _freezeAllEvents = false;
 let _frozenEventInstances = [];

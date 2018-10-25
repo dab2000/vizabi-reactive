@@ -23,7 +23,7 @@ const label = function(context) {
       })
       .on("drag", function(d, i) {
         const KEY = _this.KEY;
-        if (!_this.model.ui.chart.labels.dragging) return;
+        if (!_this.model.ui.config.chart.labels.dragging) return;
         if (!this.druging) _this.druging = d[KEY];
         const cache = _this.cached[d[KEY]];
         cache.labelFixed = true;
@@ -290,7 +290,7 @@ const label = function(context) {
       const textBBox = labelGroup.select("text").node().getBBox();
       let diffX2 = -textBBox.width * 0.5;
       let diffY2 = -height * 0.2;
-      const labels = _this.model.ui.chart.labels;
+      const labels = _this.model.ui.config.chart.labels;
 
       const bBox = labels.removeLabelBox ? textBBox : rectBBox;
 
@@ -409,7 +409,7 @@ const Labels = Class.extend({
         _this.updateLabelsOnlyTextSize();
       });
 
-    if (this.model.ui.chart.labels.hasOwnProperty("removeLabelBox"))
+    if (this.model.ui.config.chart.labels.hasOwnProperty("removeLabelBox"))
       this.model.on("change:ui.chart.labels.removeLabelBox", (evt, path) => {
         //console.log("EVENT change:marker:size:max");
         if (!_this.context._readyOnce) return;
@@ -664,7 +664,7 @@ const Labels = Class.extend({
 
     const _cssPrefix = this.options.CSS_PREFIX;
 
-    const labels = _this.model.ui.chart.labels || {};
+    const labels = _this.model.ui.config.chart.labels || {};
     labelGroup.classed("vzb-label-boxremoved", labels.removeLabelBox);
 
     const _text = text || labelGroup.selectAll("." + _cssPrefix + "-label-content");

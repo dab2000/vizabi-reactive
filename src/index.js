@@ -2,8 +2,10 @@ import { autorun, action, spy, observable } from 'mobx';
 import { vizabi } from './vizabi';
 import { config } from './linechart/config';
 import appState from './appState';
-import Linechart from './linechart/index';
 import { isEntityConcept, arrayEquals, relativeComplement } from './utils';
+
+window.Vizabi = require('./vizabi-components/vizabi').default;
+require('./linechart');
 
 var ddfcsv = new DDFCsvReader.getDDFCsvReaderObject();
 var waffle = new WsReader.WsReader.getReader();
@@ -13,7 +15,7 @@ vizabi.stores.dataSource.createAndAddType('waffle', waffle);
 //window.vizabi = vizabi;
 window.autorun = autorun;
 
-const tool = new Linechart(d3.select("#wrapper").node(), config);
+const tool = Vizabi("LineChart", d3.select("#wrapper").node(), config);
 
 window.viz = {config: tool.getConfig(), stores: tool.getStores()};
 

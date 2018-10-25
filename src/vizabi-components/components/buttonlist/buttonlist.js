@@ -1,6 +1,6 @@
-import * as utils from "../../base/utils";
-import Component from "../../base/component";
-import * as iconset from "../../base/iconset";
+import * as utils from "base/utils";
+import Component from "base/component";
+import * as iconset from "base/iconset";
 
 /*!
  * VIZABI BUTTONLIST
@@ -222,7 +222,7 @@ const ButtonList = Component.extend({
     //   }
     // });
 
-    ////this.model.ui.buttons = button_list;
+    ////this.model.ui.config.buttons = button_list;
 
     //add buttons and render components
     this._addButtons(button_list, button_expand);

@@ -1,3 +1,7 @@
+
 module.exports = {
-    mode: 'development'
+    mode: 'development',
+    resolve: {
+        modules: ['vizabi-components', 'node_modules']
+    }
 };

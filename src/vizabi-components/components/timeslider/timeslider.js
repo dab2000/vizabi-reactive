@@ -1,6 +1,6 @@
-import * as utils from "../../base/utils";
-import Component from "../../base/component";
-import axisSmart from "../../helpers/d3.axisWithLabelPicker";
+import * as utils from "base/utils";
+import Component from "base/component";
+import axisSmart from "helpers/d3.axisWithLabelPicker";
 import { autorun, action, when, reaction, spy, observable, extendObservable } from 'mobx';
 import { FULFILLED } from "mobx-utils";
 
@@ -160,12 +160,12 @@ const TimeSlider = Component.extend({
     this.profiles = utils.deepClone(profiles);
     this.presentationProfileChanges = utils.deepClone(presentationProfileChanges);
 
-    if ((this.model.ui.chart || {}).margin) {
+    if ((this.model.ui.config.chart || {}).margin) {
       this.model.on("change:ui.chart.margin", (evt, path) => {
         const layoutProfile = _this.getLayoutProfile();
         if (layoutProfile !== "small") {
           const profile = _this.profiles[layoutProfile];
-          profile.margin.left = _this.model.ui.chart.margin.left;
+          profile.margin.left = _this.model.ui.config.chart.margin.left;
         }
         if (_this.slide) {
           _this.updateSize();

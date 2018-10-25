@@ -1,13 +1,13 @@
-import * as utils from "./utils";
+import * as utils from "base/utils";
 //import Model from "base/model";
-import Component from "./component";
-import EventSource, { DefaultEvent } from "./events";
+import Component from "base/component";
+import EventSource, { DefaultEvent } from "base/events";
 //import DimensionManager from "base/dimensionmanager";
 //import DataManager from "base/datamanager";
+import { UI } from "model/ui";
 import { observable, reaction } from "mobx";
 import { FULFILLED } from "mobx-utils";
 import { vizabi } from '../../vizabi';
-import { UI } from "../model/ui";
 
 const class_loading_first = "vzb-loading-first";
 const class_loading_data = "vzb-loading-data";
@@ -15,30 +15,6 @@ const class_placeholder = "vzb-placeholder";
 const class_buttons_off = "vzb-buttonlist-off";
 
 const templates = {};
-
-//TODO: move
-// Copies a variable number of methods from source to target.
-d3.rebind = function(target, source) {
-  let i = 1, method;
-  const n = arguments.length;
-  while (++i < n) target[method = arguments[i]] = d3_rebind(target, source, source[method]);
-  return target;
-};
-
-// Method is assumed to be a standard D3 getter-setter:
-// If passed with no arguments, gets the value.
-// If passed with arguments, sets the value and returns the target.
-function d3_rebind(target, source, method) {
-  return function() {
-    const value = method.apply(source, arguments);
-    return value === source ? target : value;
-  };
-}
-
-import { onTap, onLongTap } from "../helpers/d3.touchEvents";
-d3.selection.prototype.onTap = onTap;
-d3.selection.prototype.onLongTap = onLongTap;
-
 
 //tool model is quite simple and doesn't need to be registered
 // // const ToolModel = ({//Model.extend({

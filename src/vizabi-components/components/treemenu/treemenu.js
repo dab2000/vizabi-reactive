@@ -1,8 +1,8 @@
-import * as utils from "../../base/utils";
-import Component from "../../base/component";
-import Class from "../../base/class";
+import * as utils from "base/utils";
+import Component from "base/component";
+import Class from "base/class";
 //import Marker from "models/marker";
-import { close as iconClose } from "../../base/iconset";
+import { close as iconClose } from "base/iconset";
 import { autorun, reaction } from "mobx";
 
 /*!
@@ -784,7 +784,7 @@ const TreeMenu = Component.extend({
     dataModels.forEach((m, mName) => {
 
       //figure out the folder strategy
-      let strategy = utils.getProp(this.model.ui, ["treemenu", "folderStrategyByDataset", mName]);
+      let strategy = utils.getProp(this.model.ui.config, ["treemenu", "folderStrategyByDataset", mName]);
       let folder = null;
       if (!strategy) strategy = FOLDER_STRATEGY_DEFAULT;
 

@@ -1,4 +1,4 @@
-import { forEach, warn } from "./utils";
+import { forEach, warn } from "base/utils";
 
 let initializing = false;
 const fnTest = /xyz/.test(() => {

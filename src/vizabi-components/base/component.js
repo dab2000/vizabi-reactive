@@ -1,9 +1,9 @@
-import * as utils from "./utils";
-import Events from "./events";
+import * as utils from "base/utils";
+import Events from "base/events";
 //import Model from "base/model";
-//import globals from "./globals";
+//import globals from "base/globals";
 
-import { close as iconClose } from "./iconset";
+import { close as iconClose } from "base/iconset";
 import { observable, reaction, when, computed, decorate } from "mobx";
 import { FULFILLED, fromPromise } from "mobx-utils";
 const class_loading_first = "vzb-loading-first";
@@ -459,7 +459,7 @@ const Component = Events.extend({
      * @returns {Object} the model info, with name and the actual model
      */
     function _mapOne(name) {
-      const normName = (name[0] !== "." && name[1] !== ":") ? "." + name : name;
+      const normName = (name[0] !== "." && name[0] !== ":") ? "." + name : name;
       //const parts = name.split(".");
       let current = _this.parent.model;
       if (name !== ".") {

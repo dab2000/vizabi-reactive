@@ -1,22 +1,15 @@
-// const {
-//   utils,
-//   Component,
-//   helpers: {
-//     "d3.axisWithLabelPicker": axisSmart,
-//     "d3.collisionResolver": collisionResolver 
-//   },
-//   iconset: {
-//     warn: iconWarn,
-//     question: iconQuestion
-//   }
-// } = Vizabi;
-
-import Component from "../vizabi-components/base/component";
-import * as utils from "../vizabi-components/base/utils";
-import axisSmart from "../vizabi-components/helpers/d3.axisWithLabelPicker";
-import collisionResolver from "../vizabi-components/helpers/d3.collisionResolver";
-import { warn as iconWarn,
-  question as iconQuestion } from "../vizabi-components/base/iconset";
+const {
+  utils,
+  Component,
+  helpers: {
+    "d3.axisWithLabelPicker": axisSmart,
+    "d3.collisionResolver": collisionResolver 
+  },
+  iconset: {
+    warn: iconWarn,
+    question: iconQuestion
+  }
+} = Vizabi;
 import { autorun, action, when, reaction, spy, observable } from 'mobx';
 import { FULFILLED } from "mobx-utils";
 
@@ -56,7 +49,7 @@ const LCComponent = Component.extend("linechart", {
         // hide tooltip on touch devices when playing
         if (_this.model.time.playing && utils.isTouchDevice() && !_this.tooltip.classed("vzb-hidden")) _this.tooltip.classed("vzb-hidden", true);
   
-        if (!_this.model.ui.chart.hideXAxisValue && _this.model.time.playing && _this.time - _this.model.time.start === 0) {
+        if (!_this.model.ui.config.chart.hideXAxisValue && _this.model.time.playing && _this.time - _this.model.time.start === 0) {
           _this.xAxisEl.call(
             _this.xAxis
               .highlightTransDuration(0)
@@ -269,8 +262,8 @@ const LCComponent = Component.extend("linechart", {
     });
 
     this.wScale = d3.scaleLinear()
-    ////  .domain(this.model.ui.datawarning.doubtDomain)
-    ////  .range(this.model.ui.datawarning.doubtRange);
+    ////  .domain(this.model.ui.config.datawarning.doubtDomain)
+    ////  .range(this.model.ui.config.datawarning.doubtRange);
 
     this.on("resize", () => {
       //return if updatesize exists with error

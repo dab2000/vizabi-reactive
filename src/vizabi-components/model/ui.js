@@ -1,4 +1,4 @@
-import * as utils from "../base/utils";
+import * as utils from "base/utils";
 
 //classes are vzb-portrait, vzb-landscape...
 const class_prefix = "vzb-";

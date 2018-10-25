@@ -1,4 +1,4 @@
-import * as utils from "../base/utils";
+import * as utils from "base/utils";
 //d3.axisSmart
 
 export default function axisSmart(_orient) {
