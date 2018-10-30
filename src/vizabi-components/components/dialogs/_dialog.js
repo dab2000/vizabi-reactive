@@ -2,7 +2,7 @@ import * as utils from "base/utils";
 import Component from "base/component";
 import { drag as iconDrag, pin as iconPin } from "base/iconset";
 import requireAll from "helpers/requireAll";
-const dialogTemplates = requireAll(require.context("components/dialogs/", true, /\.html$/));
+const dialogTemplates = requireAll(require.context("raw-loader!components/dialogs/", true, /\.html$/));
 
 /*!
  * VIZABI DIALOG
@@ -22,7 +22,7 @@ const Dialog = Component.extend({
     this.name = this.name || "";
 
     this.model_expects = this.model_expects || [{
-      name: "state",
+      name: "stores",
       type: "model"
     }, {
       name: "ui",

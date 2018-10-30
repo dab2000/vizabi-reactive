@@ -54,7 +54,7 @@ export function color(config, parent) {
                 .range(range)
                 .interpolate(d3.interpolateCubehelix);
         
-            } else if (scaleType !== this.ordinalScale) {
+            } else if (!this.isDiscrete) {
         
               let limits = this.domain;//this.getLimits(this.which);
               //default domain is based on limits

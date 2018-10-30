@@ -7,20 +7,40 @@ export function labelDataConfig(cfg, parent) {
     const dataPlain = dataConfig(cfg, parent);
 
     return compose(dataPlain, {
-
+        get markerSources() {
+            const sources = new Set();
+            for (const enc of this.parent.marker.encoding.values()) {
+                sources.add(enc.data.source);
+            }
+            return [...sources];    
+        },
         get promise() {
-            return fromPromise(this.source.conceptsPromise.then(() => {
+            return fromPromise(Promise.all(this.markerSources.map(s => s.conceptsPromise)).then(() => {
                 const entityDims = this.space.filter(dim => this.source.isEntityConcept(dim));
-                const labelPromises = entityDims.map(dim =>
-                    this.source.query({
+
+                const entities = entityDims.map(dim => ({ 
+                    source: this.source,
+                    key: dim 
+                }));
+                this.markerSources.map(s => {
+                    s.availability.data.map(({key, value}) => {
+                        if (key.length == 1 && entityDims.includes(key[0]) && s.isEntityConcept(value)) {
+                                entities.push({ source:s, key: value, domain: key[0] })
+                        }
+                    });
+                });
+
+                const labelPromises = entities.map(({ source, key, domain }) =>
+                    source.query({
                         select: {
-                            key: [dim],
+                            key: [key],
                             value: [this.concept]
                         },
                         from: "entities"
                     }).then(data => ({
-                        dim,
-                        data
+                        dim: key,
+                        data,
+                        domain
                     }))
                 );
                 return fromPromise(Promise.all(labelPromises));

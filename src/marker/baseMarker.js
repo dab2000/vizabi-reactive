@@ -133,6 +133,13 @@ let functions = {
         const important = this.important;
         for (let [key, row] of dataMap)
             if (important.some(prop => !row.hasOwnProperty(prop) || !row[prop])) dataMap.delete(key);
+    },
+    get markerKeys() {
+        const markerKeys = new Set();
+        for (const data of this.dataMapCache.values()) {
+            markerKeys.add(data[Symbol.for("key")]);
+        }
+        return markerKeys;
     }
 }
 

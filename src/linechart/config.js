@@ -236,10 +236,15 @@ export const config = {
         },
         "buttons": ["colors", "find", "moreoptions", "fullscreen", "presentation"],
         "dialogs": {
-            "popup": ["colors", "find", "moreoptions"],
+            "popup": ["colors", "find"],//, "moreoptions"],
             "sidebar": ["colors", "find"],
             "moreoptions": ["opacity", "speed", "axes", "colors", "presentation", "about"],
-            "dialog": {"find": {"panelMode": "show"}}
+            "dialog": {"find": {"panelMode": "show"}},
+            "modelConfig": {
+                "marker": "marker:bubble",
+                "frame": "marker:bubble.encoding:frame",
+                "legendMarker": "marker:legend"
+            }
         },
         "presentation": false
     },

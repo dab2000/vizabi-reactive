@@ -31,6 +31,10 @@ export function dataConfig(config = {}, parent) {
         get commonSpace() {
             return intersect(this.space, this.parent.marker.data.space);
         },
+        get noFrameSpace() {
+            const frameEnc = (this.parent.marker || this.parent).encoding.get("frame") || {};
+            return this.space.filter(dim => dim != frameEnc.data.concept);
+        },
         get filter() {
             const config = this.config.filter || ((this.parent.marker) ? this.parent.marker.data.config.filter : {})
             return observable(filter(config, this));

@@ -22,6 +22,7 @@ export function bubble(config) {
     return assign(base, {
         get encoding() {
             const enc = this.superEncoding;
+            enc.set('entityValues', encodingStore.getByDefinition({ modelType: "entityValues" }));
             enc.set('highlighted', encodingStore.getByDefinition({ modelType: "selection" }));
             enc.set('superhighlighted', encodingStore.getByDefinition({ modelType: "selection" }));
             return enc;

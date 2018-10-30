@@ -55,6 +55,9 @@ const functions = {
     get hasOwnData() {
         return this.data && this.data.hasOwnData;
     },
+    get isEncoding () {
+        return true;
+    },
     addPropertyToMarkers(dataMap, prop) {
         if (this.data && this.data.concept) {
             // simply copy from row key

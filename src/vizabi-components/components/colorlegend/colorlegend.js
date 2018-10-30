@@ -19,10 +19,10 @@ const ColorLegend = Component.extend({
       name: "time",
       type: "time"
     }, {
-      name: "entities",
-      type: "entities"
-    }, {
       name: "marker",
+      type: "marker"
+    }, {
+      name: "legendMarker",
       type: "marker"
     }, {
       name: "color",

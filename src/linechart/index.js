@@ -24,9 +24,9 @@ const LineChart = Vizabi.Tool.extend("LineChart", {
       model: ["marker:bubble.encoding:frame", "marker:bubble", "ui"],
       ui: { show_value_when_drag_play: true, axis_aligned: false }
     }, {
-      component: Vizabi.Component.get("dialogs"),
-      placeholder: ".vzb-tool-dialogs",
-      model: [".", "ui", "locale"]
+       component: Vizabi.Component.get("dialogs"),
+       placeholder: ".vzb-tool-dialogs",
+       model: [".", "ui", "locale:locale"]
     }, {
       component: Vizabi.Component.get("buttonlist"),
       placeholder: ".vzb-tool-buttonlist",

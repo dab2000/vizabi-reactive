@@ -50,7 +50,7 @@ const Component = Events.extend({
     this.model_binds   = this.model_binds || {};
     this.createModel(config.model);
 
-    this.ui = this.model.ui.config || this.ui || config.ui;
+    this.ui = (this.model.ui || {}).config || this.ui || config.ui;
     this._super();
 
     this.registerListeners();

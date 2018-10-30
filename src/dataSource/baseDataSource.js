@@ -138,7 +138,7 @@ const functions = {
         return concept;
     },
     getConcept(conceptId) {
-        if (conceptId == "concept_type" || conceptId.indexOf('is--') === 0)
+        if (conceptId == "concept" || conceptId == "concept_type" || conceptId.indexOf('is--') === 0)
             return { concept: conceptId, name: conceptId }
         return this.concepts.get(conceptId);
     },
@@ -154,7 +154,7 @@ const functions = {
             from: "entities"
         });
     },
-    getTags(){
+    getTags() {
         return fromPromise(this.tagsPromise);
     },
     getDatasetName() {

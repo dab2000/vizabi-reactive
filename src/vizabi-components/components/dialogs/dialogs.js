@@ -1,6 +1,6 @@
 import Dialog from "./_dialog";
-import * as utils from "base/utils";
-import Component from "base/component";
+import * as utils from "../../base/utils";
+import Component from "../../base/component";
 
 /*!
  * VIZABI DIALOGS
@@ -26,7 +26,7 @@ const Dialogs = Component.extend({
 
 
     this.model_expects = [{
-      name: "state",
+      name: "stores",
       type: "model"
     }, {
       name: "ui",
@@ -53,15 +53,15 @@ const Dialogs = Component.extend({
   },
 
   domReady() {
-    const dialog_popup = (this.model.ui.dialogs || {}).popup || [];
-    let dialog_sidebar = (this.model.ui.dialogs || {}).sidebar || [];
+    const dialog_popup = (this.model.ui.config.dialogs || {}).popup || [];
+    let dialog_sidebar = (this.model.ui.config.dialogs || {}).sidebar || [];
 
     this.rootEl = this.root.element instanceof Array ? this.root.element : d3.select(this.root.element);
 
     // if dialog_sidebar has been passed in with boolean param or array must check and covert to array
     if (dialog_sidebar === true) {
       dialog_sidebar = dialog_popup;
-      (this.model.ui.dialogs || {}).sidebar = dialog_sidebar;
+      (this.model.ui.config.dialogs || {}).sidebar = dialog_sidebar;
     }
     if (dialog_sidebar.length !== 0) {
       this.rootEl.classed("vzb-dialog-expand-true", true);
@@ -174,6 +174,11 @@ const Dialogs = Component.extend({
     this._components_config = [];
     const details_dlgs = [];
     if (!dialog_list.length) return;
+
+    const dialogModelConfig = Object.keys(this.ui.dialogs.modelConfig).reduce((result, key) => {
+      result[key] = "stores." + this.ui.dialogs.modelConfig[key];
+      return result;
+    }, {});
     //add a component for each dialog
     for (let i = 0; i < dialog_list.length; i++) {
 
@@ -188,7 +193,8 @@ const Dialogs = Component.extend({
         comps.push({
           component: dlg_config.dialog,
           placeholder: '.vzb-dialogs-dialog[data-dlg="' + dlg + '"]',
-          model: ["state", "ui", "locale"]
+          model: ["stores", "ui", "locale"],
+          modelConfig: dialogModelConfig
         });
 
         dlg_config.component = comps.length - 1;

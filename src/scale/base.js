@@ -49,7 +49,7 @@ export function base(config = {}, parent) {
                 return this.config.range
 
             // default
-            return (this.type == this.ordinalScale) ?
+            return (this.isDiscrete) ?
                 d3.schemeCategory10 : [0, 1];
         },
         get domain() {
@@ -61,6 +61,9 @@ export function base(config = {}, parent) {
             const scale = scales[this.type]();
             const domain = (this.type == "log" && this.domain[0] == 0) ? [1, this.domain[1]] : this.domain;
             return scale.range(this.range).domain(domain);
+        },
+        get isDiscrete() {
+            return this.type == this.ordinalScale;
         },
           /**
          * Gets tick values for this hook
