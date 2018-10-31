@@ -110,8 +110,8 @@ const functions = {
     currentFrameFromMap(map, empty) {
         //trace();
 
-        if (map.has(this.value)) {
-            return map.get(this.value);
+        if (map.has(+this.value)) {
+            return map.get(+this.value);
         } else {
             console.warn("Frame value not found in frame map", this)
             return empty;

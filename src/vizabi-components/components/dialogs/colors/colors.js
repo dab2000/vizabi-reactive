@@ -24,10 +24,10 @@ const Colors = Dialog.extend("colors", {
       placeholder: ".vzb-caxis-selector",
       model: [config.modelConfig.frame, config.modelConfig.marker + ".encoding:color", "locale"],
       ui: { showHoverValues: true }
-    //}, {
-      // component: colorlegend,
-      // placeholder: ".vzb-clegend-container",
-      // model: ["state.time", "state.entities", "marker", "state.marker.color", "locale", "ui"]
+    }, {
+      component: colorlegend,
+      placeholder: ".vzb-clegend-container",
+      model: [config.modelConfig.frame, config.modelConfig.marker, config.modelConfig.legendMarker, config.modelConfig.marker + ".encoding:color", "locale", "ui"]
     }];
 
 

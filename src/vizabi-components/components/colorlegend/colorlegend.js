@@ -3,6 +3,7 @@ import Component from "base/component";
 import ColorPicker from "helpers/d3.colorPicker";
 import axisSmart from "helpers/d3.axisWithLabelPicker";
 import { close as iconClose } from "base/iconset";
+import { reaction } from "mobx";
 
 /*!
  * VIZABI BUBBLE COLOR LEGEND COMPONENT
@@ -35,6 +36,7 @@ const ColorLegend = Component.extend({
       type: "ui",
     }];
 
+    /*
     this.model_binds = {
       "change:color.scaleType": function(evt, path) {
         if (!_this._readyOnce || _this.colorModel.isDiscrete()) return;
@@ -73,9 +75,25 @@ const ColorLegend = Component.extend({
         _this.colorPicker.translate(_this.model.locale.getTFunction());
       }
     };
+    */
 
     //contructor is the same as any component
     this._super(config, context);
+
+    reaction(() => ({
+      h: this.model.marker.encoding.get("highlighted").data.filter.any(),
+      }),
+      (highlighted) => {
+        if (!this.colorModel.scale.isDiscrete) return;
+
+        if (highlighted) {
+          this.updateGroupsOpacity([...this.model.marker.encoding.get("highlighted").data.filter.markers.keys()]
+            .map(key => this.model.marker.dataMap.get(key)["color"]));
+        } else {
+          this.updateGroupsOpacity();
+        }
+      })
+
   },
 
   readyOnce() {
@@ -86,12 +104,12 @@ const ColorLegend = Component.extend({
     d3.select(this.placeholder.parentNode).classed("vzb-dialog-scrollable", true);
 
     this.colorModel = this.model.color;
-    this.colorlegendMarker = this.colorModel.getColorlegendMarker();
-    if (this.colorlegendMarker) {
-      this.colorlegendMarker.on("ready", () => {
-        _this.ready();
-      });
-    }
+    // this.model.legendMarker = this.colorModel.getColorlegendMarker();
+    // if (this.model.legendMarker) {
+    //   this.model.legendMarker.on("ready", () => {
+    //     _this.ready();
+    //   });
+    // }
     this.listColorsEl = this.element
       .append("div").attr("class", "vzb-cl-holder")
       .append("div").attr("class", "vzb-cl-colorlist");
@@ -189,33 +207,34 @@ const ColorLegend = Component.extend({
   ready() {
     const _this = this;
 
-    this.KEYS = utils.unique(this.model.marker._getAllDimensions({ exceptType: "time" }));
+    this.KEYS = this.model.marker.data.noFrameSpace;
     this.KEY = this.KEYS.join(",");
     this.colorlegendDim = this.KEY;
     this.canShowMap = false;
 
-    if (this.colorModel.isDiscrete() && this.colorModel.use !== "constant" && this.colorlegendMarker) {
-      if (!this.colorlegendMarker._ready) return;
+    if (this.colorModel.scale.isDiscrete && this.colorModel.data.conceptProps.use !== "constant" && this.model.legendMarker) {
+      //if (!this.model.legendMarker._ready) return;
 
-      this.markerKeys = _this.model.marker.getKeys();
-      this.KEY = _this.colorModel.getDataKeys()[0];
+      this.markerKeys = _this.model.marker.markerKeys;
+      //this.KEY = _this.colorModel.getDataKeys()[0];
 
-      this.colorlegendDim = this.colorModel.getColorlegendEntities().getDimension();
+      this.colorlegendDim = this.colorModel.data.concept;
 
-      this.colorlegendMarker.getFrame(this.model.time.value, frame => {
-        if (!frame) return utils.warn("colorlegend received empty frame in ready()");
-        _this.frame = frame;
-        _this.canShowMap = utils.keys((_this.frame || {}).hook_geoshape || {}).length;
+//      this.model.legendMarker.getFrame(this.model.time.value, frame => {
+        _this.frame = this.model.legendMarker.dataMap;
 
-        _this.colorlegendKeys = _this.colorlegendMarker.getKeys(_this.colorlegendDim);
-
+        _this.colorlegendKeys = [..._this.model.legendMarker.markerKeys].map(key => ({
+          [Symbol.for("key")]: key,
+          [this.colorlegendDim]: this.frame.get(key)[this.colorlegendDim]
+        }))
+        _this.canShowMap = true;//utils.keys((_this.frame || {}).map || {}).length;
         _this.colorlegendKeys.forEach(d => {
-          if (!((_this.frame || {}).hook_geoshape || {})[d[_this.colorlegendDim]]) _this.canShowMap = false;
+          if (!this.frame.get(d[Symbol.for("key")]).map) _this.canShowMap = false;
         });
-        _this.updateView();
-        _this.updateGroupsOpacity();
-      });
-      return;
+//        _this.updateView();
+//        _this.updateGroupsOpacity();
+//      });
+//      return;
     }
 
     _this.updateView();
@@ -229,7 +248,7 @@ const ColorLegend = Component.extend({
     const _this = this;
     const KEY = this.KEY;
 
-    const palette = this.colorModel.getPalette();
+    const palette = this.colorModel.palette;
     const canShowMap = this.canShowMap;
 
     const colorlegendKeys = this.colorlegendKeys || [];
@@ -241,8 +260,8 @@ const ColorLegend = Component.extend({
     //or if using a discrete palette that would map to all entities on the chart and therefore will be too long
     //in the latter case we should show colors in the "find" list instead
     const hideColorOptions = canShowMap
-      || this.colorModel.which == "_default"
-      || this.colorlegendMarker && this.colorlegendDim == this.KEY
+      || this.colorModel.data.concept == "_default"
+      || this.model.legendMarker && this.colorlegendDim == this.KEY
         && colorlegendKeys.length > 10 && utils.comparePlainObjects(this.colorModel.getColorlegendEntities().getFilter(), this.model.entities.getFilter());
 
     colorOptions.classed("vzb-hidden", hideColorOptions);
@@ -250,16 +269,16 @@ const ColorLegend = Component.extend({
     this._updateSelectDialog();
 
     //Hide rainbow element if showing minimap or if color is discrete
-    this.rainbowEl.classed("vzb-hidden", this.colorModel.isDiscrete());
-    this.labelScaleEl.classed("vzb-hidden", this.colorModel.isDiscrete());
-    this.rainbowLegendEl.classed("vzb-hidden", this.colorModel.isDiscrete());
+    this.rainbowEl.classed("vzb-hidden", this.colorModel.scale.isDiscrete);
+    this.labelScaleEl.classed("vzb-hidden", this.colorModel.scale.isDiscrete);
+    this.rainbowLegendEl.classed("vzb-hidden", this.colorModel.scale.isDiscrete);
     //Hide minimap if no data to draw it
-    this.minimapEl.classed("vzb-hidden", !canShowMap || !this.colorModel.isDiscrete());
+    this.minimapEl.classed("vzb-hidden", !canShowMap || !this.colorModel.scale.isDiscrete);
 
     this.subtitleDiv.classed("vzb-hidden", true);
-    const cScale = this.colorModel.getScale();
+    const cScale = this.colorModel.scale.d3Scale;
 
-    if (!this.colorModel.isDiscrete()) {
+    if (!this.colorModel.scale.isDiscrete) {
 
       const gradientWidth = this.rainbowEl.node().getBoundingClientRect().width;
       const paletteKeys = Object.keys(palette).map(parseFloat);
@@ -368,7 +387,7 @@ const ColorLegend = Component.extend({
       //Check if geoshape is provided
       if (!canShowMap) {
 
-        if (this.colorModel.which == "_default") {
+        if (this.colorModel.data.concept == "_default") {
           colorOptions = colorOptions.data([]);
         } else {
           colorOptions = colorOptions.data(hideColorOptions ? [] : colorlegendKeys.length ? _this.colorlegendDim == KEY ? utils.unique(_this.markerKeys, key => key[KEY]) : colorlegendKeys : Object.keys(this.colorModel.getPalette()).map(value => {
@@ -426,7 +445,7 @@ const ColorLegend = Component.extend({
             this.selectDialog.classed("vzb-hidden", false);
           })
           .each(function(d) {
-            let shapeString = _this.frame.hook_geoshape[d[_this.colorlegendDim]].trim();
+            let shapeString = _this.frame.get(d[Symbol.for("key")]).map.trim();
 
             //check if shape string starts with svg tag -- then it's a complete svg
             if (shapeString.slice(0, 4) == "<svg") {
@@ -440,7 +459,7 @@ const ColorLegend = Component.extend({
             d3.select(this)
               .attr("d", shapeString)
               .style("fill", cScale(d[_this.colorlegendDim]))
-              .append("title").text(_this.frame.label[d[_this.colorlegendDim]]);
+              .append("title").text(_this.frame.get(d[Symbol.for("key")]).name);
 
             tempdivEl.html("");
           });
@@ -454,7 +473,7 @@ const ColorLegend = Component.extend({
   },
 
   _updateSelectDialog() {
-    const isColorSelectable = this.colorModel.isUserSelectable();
+    const isColorSelectable = !!this.colorModel.data.conceptProps.selectable;
     this.editColorButtonTooltip.classed("vzb-hidden", isColorSelectable);
     this.editColorButton.classed("vzb-cl-select-dialog-item-disabled", !isColorSelectable);
 
@@ -462,15 +481,15 @@ const ColorLegend = Component.extend({
   },
 
   _highlight(values) {
-    utils.getProp(this, ["model", "ui", "chart", "superhighlightOnMinimapHover"]) ?
+    utils.getProp(this, ["model", "ui", "config", "chart", "superhighlightOnMinimapHover"]) ?
       this.model.marker.setSuperHighlight(values) :
-      this.model.marker.setHighlight(values);
+      this.model.marker.encoding.get("highlighted").data.filter.set(values);
   },
 
   _unhighlight() {
-    utils.getProp(this, ["model", "ui", "chart", "superhighlightOnMinimapHover"]) ?
+    utils.getProp(this, ["model", "ui", "config", "chart", "superhighlightOnMinimapHover"]) ?
       this.model.marker.clearSuperHighlighted() :
-      this.model.marker.clearHighlighted();
+      this.model.marker.encoding.get("highlighted").data.filter.clear();
   },
 
   _interact() {
@@ -483,32 +502,33 @@ const ColorLegend = Component.extend({
       mouseover(d, i) {
         _this.moreOptionsHint.classed("vzb-hidden", false);
         //disable interaction if so stated in concept properties
-        if (!_this.colorModel.isDiscrete()) return;
+        if (!_this.colorModel.scale.isDiscrete) return;
 
         const view = d3.select(this);
         const target = d[colorlegendDim];
 
-        const filterHash = _this.colorModel.getValidItems()
-          //filter so that only countries of the correct target remain
-          .filter(f => f[_this.colorModel.which] == target)
-          .reduce((result, d) => {
-            result[d[KEY]] = true;
-            return result;
-          }, {});
+        const markersToHighlight = _this.model.marker.dataArray.filter(f => f["color"] == target)
+        // // const filterHash = _this.colorModel.getValidItems()
+        // //   //filter so that only countries of the correct target remain
+        // //   .filter(f => f[_this.colorModel.which] == target)
+        // //   .reduce((result, d) => {
+        // //     result[d[KEY]] = true;
+        // //     return result;
+        // //   }, {});
 
-        _this._highlight(_this.markerKeys.filter(key => filterHash[key[KEY]]));
+        _this._highlight(markersToHighlight);
       },
 
       mouseout(d, i) {
         _this.moreOptionsHint.classed("vzb-hidden", true);
         //disable interaction if so stated in concept properties
-        if (!_this.colorModel.isDiscrete()) return;
+        if (!_this.colorModel.scale.isDiscrete) return;
         _this._unhighlight();
       },
       clickToChangeColor(d, i) {
         //disable interaction if so stated in concept properties
-        if (!_this.colorModel.isUserSelectable()) return;
-        const palette = _this.colorModel.getPalette();
+        if (!utils.getProp(_this.colorModel.data.conceptProps, "selectable")) return;
+        const palette = _this.colorModel.palette;
         const defaultPalette = _this.colorModel.getDefaultPalette();
         const view = d3.select(this);
         const target = !_this.colorModel.isDiscrete() ? d.paletteKey : d[colorlegendDim];
@@ -521,7 +541,7 @@ const ColorLegend = Component.extend({
       },
       clickToShow(d, i) {
         //disable interaction if so stated in concept properties
-        if (!_this.colorModel.isDiscrete()) return;
+        if (!_this.colorModel.scale.isDiscrete) return;
 
         const view = d3.select(this);
         const target = d[colorlegendDim];
@@ -573,7 +593,8 @@ const ColorLegend = Component.extend({
   },
 
   resize() {
-    if (this.frame) this.updateView();
+    if (!this.frame) return;
+    this.updateView();
     this.colorPicker.resize(d3.select(".vzb-colorpicker-svg"));
   },
 
@@ -584,9 +605,9 @@ const ColorLegend = Component.extend({
   updateGroupsOpacity(highlight = []) {
     const _this = this;
 
-    const clMarker = this.colorModel.getColorlegendMarker() || {};
-    const OPACITY_REGULAR = clMarker.opacityRegular || 0.8;
-    const OPACITY_DIM = clMarker.opacityHighlightDim || 0.5;
+    //const clMarker = this.colorModel.getColorlegendMarker() || {};
+    const OPACITY_REGULAR = 0.8;//this.model.ui.config.opacityRegular || 0.8;
+    const OPACITY_DIM = 0.5;//this.model.ui.config.opacityHighlightDim || 0.5;
     const OPACITY_HIGHLIGHT = 1;
 
     const selection = _this.canShowMap ? ".vzb-cl-minimap path" : ".vzb-cl-option .vzb-cl-color-sample";
