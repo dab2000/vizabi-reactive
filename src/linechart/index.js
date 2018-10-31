@@ -43,11 +43,11 @@ const LineChart = Vizabi.Tool.extend("LineChart", {
       component: Vizabi.Component.get("datanotes"),
       placeholder: ".vzb-tool-datanotes",
       model: ["state.marker", "locale"]
+*/
     }, {
       component: Vizabi.Component.get("steppedspeedslider"),
       placeholder: ".vzb-tool-stepped-speed-slider",
-      model: ["state.time", "locale"]
-*/
+      model: ["marker:bubble.encoding:frame", "locale:locale"]
     }];
 
     this._super(placeholder, external_model);

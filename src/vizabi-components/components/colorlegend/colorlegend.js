@@ -80,10 +80,8 @@ const ColorLegend = Component.extend({
     //contructor is the same as any component
     this._super(config, context);
 
-    reaction(() => ({
-      h: this.model.marker.encoding.get("highlighted").data.filter.any(),
-      }),
-      (highlighted) => {
+    reaction(() => this.model.marker.encoding.get("highlighted").data.filter.any(),
+      highlighted => {
         if (!this.colorModel.scale.isDiscrete) return;
 
         if (highlighted) {

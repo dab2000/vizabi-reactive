@@ -118,8 +118,8 @@ function chart() {
         timeslider = timecontrol.select("#timeslider")
         .on('input', function() { frameCfg.setValueAndStop(this.value) });
         speedslider = timecontrol.select("#speedslider")
-            .attr('min', 1)
-            .attr('max', 1000)
+            .attr('min', 100)
+            .attr('max', 1200)
             .style('direction', 'rtl')
             .on('input', function() { frameCfg.setSpeed(this.value) });
     }
