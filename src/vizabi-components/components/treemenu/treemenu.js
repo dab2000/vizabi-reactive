@@ -590,6 +590,7 @@ const TreeMenu = Component.extend({
         const scaleType = this._targetModel.scale.type;
       }
       const space = this._targetModel.data.space;
+      return true;
     }, this.updateView);
     return this;
   },

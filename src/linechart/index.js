@@ -35,15 +35,14 @@ const LineChart = Vizabi.Tool.extend("LineChart", {
       component: Vizabi.Component.get("treemenu"),
       placeholder: ".vzb-tool-treemenu",
       model: ["marker:bubble", "marker:bubble.encoding:frame", "locale:locale", "ui", "dataSource"]
-/*    }, {
+    }, {
       component: Vizabi.Component.get("datawarning"),
       placeholder: ".vzb-tool-datawarning",
-      model: ["locale"]
+      model: ["locale:locale"]
     }, {
       component: Vizabi.Component.get("datanotes"),
       placeholder: ".vzb-tool-datanotes",
-      model: ["state.marker", "locale"]
-*/
+      model: ["marker:bubble", "locale:locale"]
     }, {
       component: Vizabi.Component.get("steppedspeedslider"),
       placeholder: ".vzb-tool-stepped-speed-slider",

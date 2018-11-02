@@ -255,7 +255,7 @@ const LCComponent = Component.extend("linechart", {
     this.yInfoEl.on("mouseover", function() {
       const rect = this.getBBox();
       const coord = utils.makeAbsoluteContext(this, this.farthestViewportElement)(rect.x - 10, rect.y + rect.height + 10);
-      _this.parent.findChildByName("gapminder-datanotes").setHook("axis_y").show().setPos(coord.x, coord.y);
+      _this.parent.findChildByName("gapminder-datanotes").setHook("y").show().setPos(coord.x, coord.y);
     });
     this.yInfoEl.on("mouseout", () => {
       _this.parent.findChildByName("gapminder-datanotes").hide();
