@@ -3,7 +3,8 @@ import { deepmerge, assign, createKeyStr, applyDefaults } from "../utils";
 import { configurable } from '../configurable';
 import { trace } from 'mobx';
 import { dotToJoin, addExplicitAnd } from '../ddfquerytransform';
-import { localeStore } from '../locale/localeStore'; 
+import { localeStore } from '../locale/localeStore';
+import { dataSourceStore } from './dataSourceStore';
 //import { csv, interpolate } from 'd3';
 
 const defaultConfig = {
@@ -140,7 +141,7 @@ const functions = {
     getConcept(conceptId) {
         if (conceptId == "concept" || conceptId == "concept_type" || conceptId.indexOf('is--') === 0)
             return { concept: conceptId, name: conceptId }
-        return this.concepts.get(conceptId);
+        return this.concepts.get(conceptId) || {};
     },
     isEntityConcept(conceptId) {
         return ["entity_set", "entity_domain"].includes(this.getConcept(conceptId).concept_type);
@@ -157,12 +158,12 @@ const functions = {
     getTags() {
         return fromPromise(this.tagsPromise);
     },
-    getDatasetName() {
+    get datasetName() {
         if (this.reader.getDatasetInfo) {
-          const meta = this.readerObject.getDatasetInfo();
+          const meta = this.reader.getDatasetInfo();
           return meta.name + (meta.version ? " " + meta.version : "");
         }
-        return "";////this._name.replace("data_", "");
+        return dataSourceStore.getId(this) || "";
     },
     query: function(query) {
         //return [];

@@ -795,7 +795,7 @@ const TreeMenu = Component.extend({
       }
 
       //add the dataset's folder to the tree
-      tags[mName] = { id: mName, name: m.getDatasetName() || mName, type: "dataset", children: [] };
+      tags[mName] = { id: mName, name: m.datasetName || mName, type: "dataset", children: [] };
 
       if (strategy == FOLDER_STRATEGY_FOLDER && tags[folder]) {
         tags[folder].children.push(tags[mName]);
