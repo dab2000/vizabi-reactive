@@ -236,7 +236,7 @@ export const config = {
         },
         "buttons": ["colors", "find", "moreoptions", "fullscreen", "presentation"],
         "dialogs": {
-            "popup": ["colors", "find"],//, "moreoptions"],
+            "popup": ["colors", "find", "moreoptions"],
             "sidebar": ["colors", "find"],
             "moreoptions": ["opacity", "speed", "axes", "colors", "presentation", "about"],
             "dialog": {"find": {"panelMode": "show"}},
