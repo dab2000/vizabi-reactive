@@ -1,5 +1,6 @@
 import * as utils from "base/utils";
 import Component from "base/component";
+import { reaction } from "mobx";
 
 
 /*!
@@ -57,21 +58,26 @@ const BrushSlider = Component.extend({
         type: "locale"
       }];
 
-    this.model_binds = this.model_binds || {};
-    if (!this.model_binds["ready"]) {
-      this.model_binds["ready"] = this.readyHandler.bind(this);
-    }
-    if (!this.model_binds["change:submodel." + this.arg]) {
-      this.model_binds["change:submodel." + this.arg] = this.changeHandler.bind(this);
-    }
+    // this.model_binds = this.model_binds || {};
+    // if (!this.model_binds["ready"]) {
+    //   this.model_binds["ready"] = this.readyHandler.bind(this);
+    // }
 
     this._setModel = utils.throttle(this._setModel, 50);
     //contructor is the same as any component
     this._super(config, context);
+
+    this.setterName = "set" + utils.capitalize(this.arg);
+    this.useSetter = !!this.model.submodel[this.setterName];
+
+    reaction(() => this.model.submodel[this.arg],
+    value => {
+      this.changeHandler(value);
+    });
   },
 
-  changeHandler(evt, path) {
-    const extent = this._valueToExtent(this.model.submodel[this.arg]) || [this.options.EXTENT_MIN, this.options.EXTENT_MAX];
+  changeHandler(value) {
+    const extent = this._valueToExtent(value) || [this.options.EXTENT_MIN, this.options.EXTENT_MAX];
     this._moveBrush(extent);
   },
 
@@ -263,9 +269,14 @@ const BrushSlider = Component.extend({
   _setModel(value, force, persistent) {
     const roundDigits = this.options.ROUND_DIGITS;
     value = [+value[0].toFixed(roundDigits), +value[1].toFixed(roundDigits)];
-    const newValue = {};
-    newValue[this.arg] = this._extentToValue(value);
-    this.model.submodel.set(newValue, force, persistent);
+    // // const newValue = {};
+    // // newValue[this.arg] = this._extentToValue(value);
+    // // this.model.submodel.set(newValue, force, persistent);
+    if (this.useSetter) {
+      this.model.submodel[this.setterName](this._extentToValue(value));
+    } else {
+      this.model.submodel[this.arg] = this._extentToValue(value);
+    }
   }
 
 });
