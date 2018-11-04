@@ -98,8 +98,11 @@ const Tool = Component.extend({
 
     this.postrender();
 
-    reaction(() => this.model.ui._prev_size,
-      size => {
+    reaction(() => ({
+      presentation: this.model.ui.presentation,
+      size: this.model.ui._prev_size
+    }),
+      ({size}) => {
         this.trigger("resize", size)
       }, {name:"resize"});
 
