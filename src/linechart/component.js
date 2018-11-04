@@ -168,6 +168,11 @@ const LCComponent = Component.extend("linechart", {
         _this.highlightLines();
       });
 
+    reaction(() => [this.model.ui.config.opacitySelectDim,
+      this.model.ui.config.opacityRegular], () => {
+        if (!_this._readyOnce) return;
+        _this.highlightLines();
+      });
 
 
     this.xScale = null;

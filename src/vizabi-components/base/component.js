@@ -164,7 +164,7 @@ const Component = Events.extend({
   getReadyPromise() {
     return Promise.all(
       //map data connected promises
-      this.model_expects.map(me => this.model[me.name].dataPromise).filter(f => f)
+      this.model_expects.map(me => this.model[me.name] && this.model[me.name].dataPromise).filter(f => f)
     );
   },
 
@@ -355,7 +355,7 @@ const Component = Events.extend({
   getPresentationMode() {
     // get profile from parent if layout is not available
     return this.model.ui ?
-      this.model.ui.getPresentationMode() :
+      this.model.ui.presentation :
       this.parent.getPresentationMode();
   },
 

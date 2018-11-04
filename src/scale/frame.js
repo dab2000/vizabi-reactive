@@ -21,7 +21,7 @@ export function frame(config, parent) {
                 keys = keys.filter(key => key >= domain[0] && key <= domain[1]);
             }
             // function is used by scale so this refers to scale, not frame
-            return d3.extent(keys);
+            return d3.extent(keys).map(key => frameEnc.format.data.parse(frameEnc.format.data(key)));
         },
     });
 }

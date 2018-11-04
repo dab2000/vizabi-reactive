@@ -471,7 +471,7 @@ const ColorLegend = Component.extend({
   },
 
   _updateSelectDialog() {
-    const isColorSelectable = !!this.colorModel.data.conceptProps.selectable;
+    const isColorSelectable = utils.getProp(this.colorModel.data.conceptProps, ["color", "selectable"], false);
     this.editColorButtonTooltip.classed("vzb-hidden", isColorSelectable);
     this.editColorButton.classed("vzb-cl-select-dialog-item-disabled", !isColorSelectable);
 
@@ -525,7 +525,7 @@ const ColorLegend = Component.extend({
       },
       clickToChangeColor(d, i) {
         //disable interaction if so stated in concept properties
-        if (!utils.getProp(_this.colorModel.data.conceptProps, "selectable")) return;
+        if (!utils.getProp(_this.colorModel.data.conceptProps, ["color", "selectable"], false)) return;
         const palette = _this.colorModel.palette;
         const defaultPalette = _this.colorModel.getDefaultPalette();
         const view = d3.select(this);
