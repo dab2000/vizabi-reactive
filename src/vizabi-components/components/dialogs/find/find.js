@@ -5,6 +5,7 @@ import show from "./show";
 import select from "./select";
 import singlehandleslider from "components/brushslider/singlehandleslider/singlehandleslider";
 import indicatorpicker from "components/indicatorpicker/indicatorpicker";
+import { reaction } from "mobx";
 
 /*!
  * VIZABI FIND CONTROL
@@ -43,20 +44,27 @@ const Find = Dialog.extend("find", {
       });
     }
 
-    this.model_binds = {
-      "change:ui.dialogs.dialog.find.enableSelectShowSwitch": function(evt) {
-        if (!_this._readyOnce) return;
-        _this.enableSelectShowSwitch = ((config.ui.dialogs.dialog || {}).find || {}).enableSelectShowSwitch || false;
-        _this.element.select(".vzb-dialog-title-switch .vzb-switch-slider").classed("vzb-hidden", !_this.enableSelectShowSwitch);
-        _this.element.select(".vzb-dialog-title-switch").style("pointer-events", _this.enableSelectShowSwitch ? "auto" : "none");
-      },
-      "translate:locale": function() {
-        if (!_this._readyOnce) return;
-        _this.input_search.attr("placeholder", _this.translator("placeholder/search") + "...");
-      }
-    };
+    // this.model_binds = {
+    //   "change:ui.dialogs.dialog.find.enableSelectShowSwitch": function(evt) {
+    //     if (!_this._readyOnce) return;
+    //     _this.enableSelectShowSwitch = ((config.ui.dialogs.dialog || {}).find || {}).enableSelectShowSwitch || false;
+    //     _this.element.select(".vzb-dialog-title-switch .vzb-switch-slider").classed("vzb-hidden", !_this.enableSelectShowSwitch);
+    //     _this.element.select(".vzb-dialog-title-switch").style("pointer-events", _this.enableSelectShowSwitch ? "auto" : "none");
+    //   },
+    //   "translate:locale": function() {
+    //     if (!_this._readyOnce) return;
+    //     _this.input_search.attr("placeholder", _this.translator("placeholder/search") + "...");
+    //   }
+    // };
 
     this._super(config, parent);
+
+    reaction(() => this.ui.dialogs.dialog.find.enableSelectShowSwitch, () => {
+      if (!_this._readyOnce) return;
+      _this.enableSelectShowSwitch = ((config.ui.dialogs.dialog || {}).find || {}).enableSelectShowSwitch || false;
+      _this.element.select(".vzb-dialog-title-switch .vzb-switch-slider").classed("vzb-hidden", !_this.enableSelectShowSwitch);
+      _this.element.select(".vzb-dialog-title-switch").style("pointer-events", _this.enableSelectShowSwitch ? "auto" : "none");
+    });
   },
 
   /**
