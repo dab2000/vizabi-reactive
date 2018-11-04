@@ -162,21 +162,25 @@ export function UI(config = {}, parent) {
 
     this._container = container;
     this.setSize();
-    this.updatePresentation();
+    //this.updatePresentation();
   },
 
   /**
    * Sets the presentation mode for this layout
    * @param {Bool} presentation mode on or off
    */
-  updatePresentation() {
-    utils.classed(this._container, class_prefix + class_presentation, this.presentation);
-    //this.trigger("resize");
-  },
+  // updatePresentation() {
+  //   utils.classed(this._container, class_prefix + class_presentation, this.config.presentation);
+  //   //this.trigger("resize");
+  // },
 
-  getPresentationMode() {
-    return this.presentation;
+  get presentation() {
+    utils.classed(this._container, class_prefix + class_presentation, this.config.presentation);
+    return this.config.presentation;
   },
+  // getPresentationMode() {
+  //   return this.config.presentation;
+  // },
 
   setRTL(flag) {
     utils.classed(this._container, class_prefix + class_rtl, flag);
