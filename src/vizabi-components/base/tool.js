@@ -119,10 +119,6 @@ const Tool = Component.extend({
     external_model.bind = external_model.bind || {}; //bind functions can be undefined
     //this.model = new ToolModel(this, external_model);
     //this.model.setInterModelListeners();
-    var ddfcsv = new DDFCsvReader.getDDFCsvReaderObject();
-    var waffle = new WsReader.WsReader.getReader();
-    vizabi.stores.dataSource.createAndAddType('ddfcsv', ddfcsv);
-    vizabi.stores.dataSource.createAndAddType('waffle', waffle);
 
     const viz = vizabi(external_model);
     this.model = viz.stores;
