@@ -289,7 +289,7 @@ $vzb-dialog-content-height: 250px;
         text-overflow: ellipsis;
         transition: color 0.3s;
 
-        &.vzb-find-item-brokendata {
+        &.vzb-select-item-brokendata {
           color: $vzb-color-primary-light;
           text-decoration: line-through;
         }

@@ -1,5 +1,6 @@
 import * as utils from "base/utils";
 import Component from "base/component";
+import { reaction } from "mobx";
 
 /*!
  * VIZABI SHOW PANEL CONTROL
@@ -9,7 +10,7 @@ import Component from "base/component";
 const Select = Component.extend({
 
   init(config, parent) {
-    this.name = "show";
+    this.name = "select";
     const _this = this;
 
     this.template = this.template || require("raw-loader!./select.html");
@@ -29,6 +30,7 @@ const Select = Component.extend({
       type: "locale"
     }];
 
+/*
     this.model_binds = {
       "change:marker.select": function(evt) {
         _this.items.order();
@@ -57,8 +59,31 @@ const Select = Component.extend({
         });
       }
     }
+    */
 
     this._super(config, parent);
+
+    reaction(() => this.model.marker.encoding.get("selected").data.filter.markers.size,
+      () => {
+        this.items.order();
+        this.selectDataPoints();
+        this.showHideButtons();
+      });
+
+    reaction(() => this.model.time.value,
+      time => {
+        if (!this._readyOnce) return;
+        // hide changes if the dialog is not visible
+        if (!this.parent.placeholderEl.classed("vzb-active") && !this.parent.placeholderEl.classed("vzb-sidebar")) return;
+
+        this.time = time;
+
+        this.model.time.getFrame(time, values => {
+          if (!values) return;
+          this.redrawDataPoints(values);
+        });
+
+      });
   },
 
   /**
@@ -89,19 +114,23 @@ const Select = Component.extend({
   ready() {
     this._super();
 
+    this.translator = this.model.locale.getTFunction();
+
     const _this = this;
 
-    //this.importantHooks = _this.model.marker.getImportantHooks();
+    this.KEYS = this.model.marker.data.noFrameSpace;
+    this.importantHooks = _this.model.marker.important;
 
     this.time = this.model.time.value;
     this.model.time.getFrame(this.time, values => {
       if (!values) return;
 
       const data = [..._this.model.marker.markerKeys].map(key => {
+        const labelObj = values.get(key).label;
         const d = {};
-        d.key = key;
+        d[Symbol.for("key")] = key;
         d.brokenData = false;
-        d.name = key;//_this.model.marker.getCompoundLabelText(d, values);
+        d.name = labelObj ? this.KEYS.map(key => labelObj[key]).join(",") : key;//_this.model.marker.getCompoundLabelText(d, values);
         return d;
       });
 
@@ -110,35 +139,35 @@ const Select = Component.extend({
 
       _this.list.html("");
 
-      _this.items = _this.list.selectAll(".vzb-find-item")
+      _this.items = _this.list.selectAll(".vzb-select-item")
         .data(data)
         .enter()
         .append("div")
-        .attr("class", "vzb-find-item vzb-dialog-checkbox");
+        .attr("class", "vzb-select-item vzb-dialog-checkbox");
 
       _this.items.append("input")
         .attr("type", "checkbox")
-        .attr("class", "vzb-find-item")
-        .attr("id", (d, i) => "-find-" + i + "-" + _this._id)
+        .attr("class", "vzb-select-item")
+        .attr("id", (d, i) => "-select-" + i + "-" + _this._id)
         .on("change", d => {
           //clear highlight so it doesn't get in the way when selecting an entity
-          if (!utils.isTouchDevice()) _this.model.marker.clearHighlighted();
-          _this.model.marker.selectMarker(d);
+          if (!utils.isTouchDevice()) _this.model.marker.encoding.get("highlighted").data.filter.clear();
+          _this.model.marker.encoding.get("selected").data.filter.toggle(d);
           //return to highlighted state
-          if (!utils.isTouchDevice() && !d.brokenData) _this.model.marker.highlightMarker(d);
+          if (!utils.isTouchDevice() && !d.brokenData) _this.model.marker.encoding.get("highlighted").data.filter.set(d);
         });
 
       _this.items.append("label")
-        .attr("for", (d, i) => "-find-" + i + "-" + _this._id)
+        .attr("for", (d, i) => "-select-" + i + "-" + _this._id)
         .text(d => d.name)
         .attr("title", function(d) {
           return this.offsetWidth < this.scrollWidth ? d.name : null;
         })
         .on("mouseover", d => {
-          if (!utils.isTouchDevice() && !d.brokenData) _this.model.marker.highlightMarker(d);
+          if (!utils.isTouchDevice() && !d.brokenData) _this.model.marker.encoding.get("highlighted").data.filter.set(d);
         })
         .on("mouseout", d => {
-          if (!utils.isTouchDevice()) _this.model.marker.clearHighlighted();
+          if (!utils.isTouchDevice()) _this.model.marker.encoding.get("highlighted").data.filter.clear();
         });
       utils.preventAncestorScrolling(_this.element.select(".vzb-dialog-scrollable"));
 
@@ -160,10 +189,8 @@ const Select = Component.extend({
         d.brokenData = false;
 
         utils.forEach(_this.importantHooks, name => {
-          if (_this.model.marker[name].use == "constant") return;
-          const hook = values[name];
-          if (!hook) return;
-          const value = hook[utils.getKey(d, KEYS)];
+          if (_this.model.marker.encoding.get(name).data.conceptProps.use == "constant") return;
+          const value = (values.get(d[Symbol.for("key")]) || {})[name];
           if (!value && value !== 0) {
             d.brokenData = true;
             return false;
@@ -172,8 +199,8 @@ const Select = Component.extend({
 
         const nameIfEllipsis = this.offsetWidth < this.scrollWidth ? d.name : "";
         view
-          .classed("vzb-find-item-brokendata", d.brokenData)
-          .attr("title", nameIfEllipsis + (d.brokenData ? (nameIfEllipsis ? " | " : "") + _this.model.time.formatDate(_this.time) + ": " + _this.translator("hints/nodata") : ""));
+          .classed("vzb-select-item-brokendata", d.brokenData)
+          .attr("title", nameIfEllipsis + (d.brokenData ? (nameIfEllipsis ? " | " : "") + _this.model.time.format.data(_this.time) + ": " + _this.translator("hints/nodata") : ""));
       });
   },
 
@@ -200,7 +227,7 @@ const Select = Component.extend({
     let search = this.input_search.node().value || "";
     search = search.toLowerCase();
 
-    this.list.selectAll(".vzb-find-item")
+    this.list.selectAll(".vzb-select-item")
       .classed("vzb-hidden", d => {
         const lower = (d.name || "").toString().toLowerCase();
         return (lower.indexOf(search) === -1);
@@ -210,16 +237,16 @@ const Select = Component.extend({
   showHideButtons() {
     if (!this._readyOnce || this.parent.getPanelMode() !== "select") return;
 
-    const someSelected = !!this.model.marker.select.length;
+    const someSelected = this.model.marker.encoding.get("selected").data.filter.any();
     this.deselect_all.classed("vzb-hidden", !someSelected);
     this.opacity_nonselected.classed("vzb-hidden", !someSelected);
     if (someSelected) {
-      this.findChildByName("singlehandleslider").trigger("resize");
+      this.parent.findChildByName("singlehandleslider").trigger("resize");
     }
   },
 
   deselectMarkers() {
-    this.model.marker.clearSelected();
+    this.model.marker.encoding.get("selected").data.filter.clear();
   },
 
   closeClick() {

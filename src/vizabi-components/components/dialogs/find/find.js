@@ -29,7 +29,7 @@ const Find = Dialog.extend("find", {
     }, {
       component: singlehandleslider,
       placeholder: ".vzb-dialog-bubbleopacity",
-      model: [config.modelConfig.marker, "locale"],
+      model: ["ui.config", "locale"],
       arg: "opacitySelectDim"
     }];
 
@@ -73,7 +73,7 @@ const Find = Dialog.extend("find", {
   readyOnce() {
     this._super();
 
-    this.panelComps = { select: this.findChildByName("show"), show: this.findChildByName("show") };
+    this.panelComps = { select: this.findChildByName("select"), show: this.findChildByName("show") };
 
     this.titleSwitch = this.element.select(".vzb-dialog-title-switch input");
     this.input_search = this.element.select(".vzb-find-search");
