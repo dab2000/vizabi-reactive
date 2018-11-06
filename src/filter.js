@@ -34,12 +34,12 @@ export function filter(config = {}, parent) {
             return this.markers.get(this.getKey(d));
         },
         set: action("setFilter", function(d, payLoad = true) {
-            if (Array.isArray(d)) d.forEach(this.set.bind(this))
+            if (Array.isArray(d)) return d.forEach(this.set.bind(this));
             const key = this.getKey(d);
             this.config.markers = mapToObj(this.markers.set(key, payLoad));
         }),
         delete: action("deleteFilter", function(d) {
-            if (Array.isArray(d)) d.forEach(this.delete.bind(this))
+            if (Array.isArray(d)) return d.forEach(this.delete.bind(this))
             const key = this.getKey(d);
             const success = this.markers.delete(key)
             this.config.markers = mapToObj(this.markers);
