@@ -72,20 +72,26 @@ const IndPicker = Component.extend({
 
     if (this.model.targetModel.isEncoding && this.showHoverValues) {
       reaction(() => this.model.targetModel.marker.encoding.get("highlighted").data.filter.any(),
-        (isHighlighted) => {
+        isHighlighted => {
           const mdl = this.model.targetModel;
           if (!mdl.isEncoding || !this.showHoverValues || mdl.data.conceptProps.use == "constant") return;
           const marker = mdl.marker;
           if (marker.encoding.get("highlighted").data.filter.markers.size > 1) return;
 
           if (isHighlighted) {
+            const key = marker.encoding.get("highlighted").data.filter.markers.keys().next().value;
+            if(mdl.scale.isDiscrete) {
+              const valueForKey = mdl.data.responseMap.get(key)[mdl.data.concept];
+              this._highlightedValue = marker.encoding.get("label") ?  marker.encoding.get("label").data.lookups.get(mdl.data.concept).get(valueForKey) : valueForKey;
+            } else {
 
+            }
+            this._highlighted = !(!this._highlightedValue && this._highlightedValue !== 0);
           } else {
-
-
-        }
-
-      })
+            this._highlighted = false;
+          }
+          this.updateView();
+        });
       
 /*      
       this.model.targetModel._parent.on("change:highlight", (evt, values) => {
@@ -205,7 +211,7 @@ const IndPicker = Component.extend({
       concept = targetModel.data.conceptProps || {};
 
       if (this.showHoverValues && this._highlighted) {
-        const formatter = targetModel.scale.getTickFormatter();
+        const formatter = targetModel.scale.tickFormatter;
 
         selectText = (this._highlightedValue || this._highlightedValue === 0) ? formatter(this._highlightedValue) : translator("hints/nodata");
 
