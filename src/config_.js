@@ -4,15 +4,15 @@ export const config = {
             type: "ddfcsv",
             path: "https://raw.githubusercontent.com/open-numbers/ddf--gapminder--systema_globalis/develop"
         },*/
-        gap: {
-            modelType: "waffle",
+        /*gap: {
+            type: "waffle",
             "path": "https://waffle-server.gapminder.org/api/ddf/ql",
             "assetsPath": "https://import-waffle-server.gapminder.org/api/ddf/assets/"
-        },
-        /*gap: {
+        },*/
+        gap: {
             modelType: "ddfcsv",
             path: "./ddf--jheeffer--mdtest/"
-        },*/
+        },
         /*
                 sg: {
                     type: "ddfcsv",
@@ -109,15 +109,6 @@ export const config = {
             data: {
                 source: "gap",
                 space: ["geo", "time"],
-                filter: {
-                    dimensions: {
-                        geo: {
-                            geo: {
-                                "$in": ["usa","chn","rus","nga"]
-                            }
-                        }
-                    }
-                },
                 /*filter: {
                     markers: {},
                     dimensions: {
@@ -130,7 +121,6 @@ export const config = {
                     }
                 }*/
             },
-            important: ["x", "y"],
             encoding: {
                 "selected": {
                     modelType: "selection",
@@ -138,24 +128,19 @@ export const config = {
                 },
                 "x": {
                     data: {
-                        concept: "time"
-                    // concept: "income_per_person_gdppercapita_ppp_inflation_adjusted"
+                        concept: "income_per_person_gdppercapita_ppp_inflation_adjusted"
                     },
                     scale: {
-                        modelType: "frame",
-                        domain: ['1950', '1980']
-                        }
+                        type: "log"
+                    }
                 },
                 "y": {
                     data: {
-                        concept: "income_per_person_gdppercapita_ppp_inflation_adjusted"
+                        concept: "life_expectancy",
+                        space: ["geo", "gender", "time"]
                     },
-                    // data: {
-                    //     concept: "life_expectancy",
-                    //     space: ["geo", "gender", "time"]
-                    // },
                     scale: {
-                        type: "log"
+                        type: "linear"
                     }
                 },
                 "order": {
@@ -176,7 +161,6 @@ export const config = {
                     }
                 },
                 "color": {
-                    modelType: "color",
                     data: {
                         space: ["geo"],
                         concept: "world_4region"
@@ -207,48 +191,9 @@ export const config = {
                                 markers: {}
                             }
                         }
-                    },
-                    scale: {
-                        domain: ['1950', '1980']
                     }
                 }
             }
         }
-    },
-    ui: {
-        "chart": {
-            "curve": "curveMonotoneX",
-            "labels": {
-                "min_number_of_entities_when_values_hide": 2 //values hide when showing 2 entities or more
-            },
-            "whenHovering": {
-                "hideVerticalNow": false,
-                "showProjectionLineX": true,
-                "showProjectionLineY": true,
-                "higlightValueX": true,
-                "higlightValueY": true,
-                "showTooltip": false
-            }
-        },
-        datawarning: {
-            doubtDomain: [],
-            doubtRange: []
-        },
-        "buttons": ["colors", "find", "moreoptions", "fullscreen", "presentation"],
-        "dialogs": {
-            "popup": ["colors", "find", "moreoptions"],
-            "sidebar": ["colors", "find"],
-            "moreoptions": ["opacity", "speed", "axes", "colors", "presentation", "about"],
-            "dialog": {"find": {"panelMode": "show"}},
-            "modelConfig": {
-                "marker": "marker:bubble",
-                "frame": "marker:bubble.encoding:frame",
-                "legendMarker": "marker:legend"
-            }
-        },
-        "presentation": false
-    },
-    locale: {
-        id: "en"
     }
 }

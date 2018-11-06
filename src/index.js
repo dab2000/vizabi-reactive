@@ -1,11 +1,11 @@
 import { autorun, action, spy, observable } from 'mobx';
 import { vizabi } from './vizabi';
-import { config } from './linechart/config';
+import { config } from './config';
 import appState from './appState';
 import { isEntityConcept, arrayEquals, relativeComplement } from './utils';
 
 window.Vizabi = require('./vizabi-components/vizabi').default;
-require('./linechart');
+require('./vizabi-linechart');
 
 var ddfcsv = new DDFCsvReader.getDDFCsvReaderObject();
 var waffle = new WsReader.WsReader.getReader();
