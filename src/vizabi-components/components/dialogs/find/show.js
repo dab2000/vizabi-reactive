@@ -135,7 +135,7 @@ const Show = Component.extend({
             const result = { category: key };
             result[key] = d[key];
             result["label"] = d.name;
-            //result["isShown"] = _this.model.state[entities].isInShowFilter(d, key);
+            result["isShown"] = _this.model.marker.data.filter.includes(d, dim, key);
             return result;
           })
           :
@@ -143,7 +143,7 @@ const Show = Component.extend({
               const result = { category: key };
               result[key] = d;
               result["label"] = d.name;
-              //result["isShown"] = _this.model.state[entities].isInShowFilter(result, key);
+              result["isShown"] = _this.model.marker.data.filter.includes(d, dim);
               return result;
             });
 
@@ -325,6 +325,10 @@ const Show = Component.extend({
       setProps[entities] = { show: this.resetFilter[key] || {} };
     });
     this.model.set(setProps);
+  },
+
+  open() {
+
   },
 
   closeClick() {

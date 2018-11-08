@@ -249,6 +249,15 @@ const Select = Component.extend({
     this.model.marker.encoding.get("selected").data.filter.clear();
   },
 
+  open() {
+    this.time = this.model.time.value;
+
+    this.model.time.getFrame(this.time, values => {
+      if (!values) return;
+      _this.redrawDataPoints(values);
+    });
+  },
+
   closeClick() {
 
   }

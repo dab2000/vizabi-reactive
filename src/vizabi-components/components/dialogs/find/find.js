@@ -149,14 +149,9 @@ const Find = Dialog.extend("find", {
     this._super();
 
     this.input_search.node().value = "";
-    this.showHideSearch();
-
-    this.time = this.model.time.value;
-
-    this.model.marker.getFrame(this.time, values => {
-      if (!values) return;
-      _this.redrawDataPoints(values);
-    });
+    this.panelComps[this.panelMode].showHideSearch();
+    
+    this.panelComps[this.panelMode].open();
   },
 
   transitionEnd(event) {
