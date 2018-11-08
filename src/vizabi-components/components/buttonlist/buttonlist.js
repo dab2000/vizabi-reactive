@@ -1,6 +1,7 @@
 import * as utils from "base/utils";
 import Component from "base/component";
 import * as iconset from "base/iconset";
+import { reaction } from "mobx";
 
 /*!
  * VIZABI BUTTONLIST
@@ -150,6 +151,7 @@ const ButtonList = Component.extend({
 
     this._active_comp = false;
 
+
     this.model_binds = {
       "change:marker.select": function(evt) {
         if (!_this._readyOnce) return;
@@ -174,20 +176,24 @@ const ButtonList = Component.extend({
       }
     };
 
+
+    // builds model
+    this._super(config, context);
+
+
     // config.ui is same as this.model.ui here but this.model.ui is not yet available because constructor hasn't been called.
     // can't call constructor earlier because this.model_binds needs to be complete before calling constructor
     config.ui.buttons.forEach(buttonId => {
       const button = _this._available_buttons[buttonId];
       if (button && button.statebind) {
-        _this.model_binds["change:" + button.statebind] = function(evt) {
-          if (!_this._readyOnce) return;
-          button.statebindfunc(buttonId, evt.source.value);
-        };
+        //_this.model_binds["change:" + button.statebind] = function(evt) {
+        reaction(() => utils.getProp(this.model, button.statebind.split(".")),
+          value => {
+            if (!_this._readyOnce) return;
+            button.statebindfunc(buttonId, value);
+          });
       }
     });
-
-    // builds model
-    this._super(config, context);
 
     //this.validatePopupButtons(this.model.ui.config.buttons, this.model.ui.config.dialogs);
 
@@ -199,9 +205,9 @@ const ButtonList = Component.extend({
     this.element = d3.select(this.placeholder);
     this.element.selectAll("div").remove();
 
-    // // this.root.findChildByName("gapminder-dialogs").on("close", (evt, params) => {
-    // //   _this.setButtonActive(params.id, false);
-    // // });
+    this.root.findChildByName("gapminder-dialogs").on("close", (evt, params) => {
+      _this.setButtonActive(params.id, false);
+    });
 
     const button_expand = (this.model.ui.config.dialogs || {}).sidebar || [];
 
