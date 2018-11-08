@@ -162,7 +162,7 @@ export function UI(config = {}, parent) {
 
     this._container = container;
     this.setSize();
-    //this.updatePresentation();
+    this.presentation;
   },
 
   /**
@@ -175,7 +175,7 @@ export function UI(config = {}, parent) {
   // },
 
   get presentation() {
-    utils.classed(this._container, class_prefix + class_presentation, this.config.presentation);
+    if (this._container) utils.classed(this._container, class_prefix + class_presentation, this.config.presentation);
     return this.config.presentation;
   },
   // getPresentationMode() {
