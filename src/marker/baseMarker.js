@@ -35,6 +35,8 @@ let functions = {
         );
     },
     get dataPromise() {
+        //trace();
+        if (this.metaDataPromise.state !== FULFILLED) return this.metaDataPromise;
         return fromPromise(Promise.all([...this.ownDataEncoding.values()].map(enc => enc.data.promise)))
     },
     get metaDataPromise() {
