@@ -134,6 +134,8 @@ const functions = {
         if (this.interpolate)
            this.interpolateFrames(frameMap, frameSpace);
 
+        this.marker.checkImportantEncodings(flatDataMap, this.marker.markerKeys);
+
         const orderEnc = this.marker.encoding.get("order");
         if (orderEnc)
             for (let [k, frame] of frameMap)

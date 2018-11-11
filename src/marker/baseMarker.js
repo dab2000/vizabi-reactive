@@ -3,7 +3,7 @@ import { encodingStore } from '../encoding/encodingStore'
 import { dataSourceStore } from '../dataSource/dataSourceStore'
 import { assign, createMarkerKey, applyDefaults, isString, intersect } from "../utils";
 import { configurable } from '../configurable';
-import { fromPromise } from 'mobx-utils'
+import { fromPromise, FULFILLED } from 'mobx-utils'
 import { resolveRef } from '../vizabi';
 import { dataConfig } from '../dataConfig/dataConfig';
 
@@ -64,6 +64,7 @@ let functions = {
     get dataMapCache() {
         //trace();
         const dataMap = new Map();
+        if (this.dataPromise.state !== FULFILLED) return dataMap;
         const markerDefiningEncodings = [];
         const markerAmmendingEncodings = [];
 
@@ -102,7 +103,9 @@ let functions = {
         }
 
         // TODO: this should only happen áfter interpolation
-        this.checkImportantEncodings(dataMap);
+        if (!this.encoding.has("frame")) {
+            this.checkImportantEncodings(dataMap, this.markerKeys);
+        }
 
         return dataMap;
     },
@@ -128,18 +131,18 @@ let functions = {
 
         return data;
     },
-    checkImportantEncodings: function(dataMap) {
+    get markerKeys() {
+        return new Map();
+    },
+    checkImportantEncodings: function(dataMap, markerKeysMap) {
         // remove markers which miss important values. Should only be done áfter interpolation though.
+        markerKeysMap.clear();
         const important = this.important;
         for (let [key, row] of dataMap)
-            if (important.some(prop => !row.hasOwnProperty(prop) || !row[prop])) dataMap.delete(key);
-    },
-    get markerKeys() {
-        const markerKeys = new Set();
-        for (const data of this.dataMapCache.values()) {
-            markerKeys.add(data[Symbol.for("key")]);
-        }
-        return markerKeys;
+            if (important.some(prop => !row.hasOwnProperty(prop) || !row[prop] && row[prop] !== 0)) dataMap.delete(key);
+            else {
+                markerKeysMap.set(row[Symbol.for("key")], row);
+            };
     }
 }
 

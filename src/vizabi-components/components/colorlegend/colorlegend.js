@@ -213,7 +213,7 @@ const ColorLegend = Component.extend({
     if (this.colorModel.scale.isDiscrete && this.colorModel.data.conceptProps.use !== "constant" && this.model.legendMarker) {
       //if (!this.model.legendMarker._ready) return;
 
-      this.markerKeys = _this.model.marker.markerKeys;
+      this.markerKeys = _this.model.marker.markerKeys.keys();
       //this.KEY = _this.colorModel.getDataKeys()[0];
 
       this.colorlegendDim = this.colorModel.data.concept;
@@ -221,7 +221,7 @@ const ColorLegend = Component.extend({
 //      this.model.legendMarker.getFrame(this.model.time.value, frame => {
         _this.frame = this.model.legendMarker.dataMap;
 
-        _this.colorlegendKeys = [..._this.model.legendMarker.markerKeys].map(key => ({
+        _this.colorlegendKeys = [..._this.model.legendMarker.markerKeys.keys()].map(key => ({
           [Symbol.for("key")]: key,
           [this.colorlegendDim]: this.frame.get(key)[this.colorlegendDim]
         }))
