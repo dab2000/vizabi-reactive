@@ -41,7 +41,7 @@ const Show = Component.extend({
     this._super();
 
     this.KEYS = this.model.marker.data.noFrameSpace;
-    this.resetFilter = {};
+    this.resetFilter = utils.deepClone(this.model.marker.data.filter.dimensions);
     // // const spaceModels = this.model.marker._space;
     // // this.KEYS.forEach(key => {
     // //   this.resetFilter[key] = utils.find(spaceModels, model => model.dim === key).show;
@@ -76,17 +76,17 @@ const Show = Component.extend({
     this.KEYS = this.model.marker.data.noFrameSpace;
     //this.labelNames = this.model.marker.getLabelHookNames();
     //const subHooks =  this.model.marker.getSubhooks(true);
-    this.previewShow = {};
+    this.previewShow = utils.deepClone(this.model.marker.data.filter.normalizedDimFilter);
     this.checkedDifference = {};
-    utils.forEach(this.labelNames, labelName => {
-      const entities = subHooks[labelName].getEntity();
-      const showFilter = this.previewShow[entities._name] = {};
-      utils.forEach(entities.show.$and || [entities.show], show$and => {
-        utils.forEach(show$and, (filter, key) => {
-          showFilter[key] = (filter.$in || []).slice(0);
-        });
-      });
-    });
+    // utils.forEach(this.labelNames, labelName => {
+    //   const entities = subHooks[labelName].getEntity();
+    //   const showFilter = this.previewShow[entities._name] = {};
+    //   utils.forEach(entities.show.$and || [entities.show], show$and => {
+    //     utils.forEach(show$and, (filter, key) => {
+    //       showFilter[key] = (filter.$in || []).slice(0);
+    //     });
+    //   });
+    // });
     this.redraw();
     this.showHideButtons();
 
@@ -132,7 +132,7 @@ const Show = Component.extend({
       utils.forEach(categories, ({ dim, key, category, isSet }) => {
         const data = isSet ?
           entitiesValuesObj[key].data.map(d => {
-            const result = { category: key };
+            const result = { category: key, domain: dim };
             result[key] = d[key];
             result["label"] = d.name;
             result["isShown"] = _this.model.marker.data.filter.includes(d, dim, key);
@@ -140,8 +140,8 @@ const Show = Component.extend({
           })
           :
           entitiesValuesObj[key].data.map(d => {
-              const result = { category: key };
-              result[key] = d;
+              const result = { category: key, domain: dim };
+              result[key] = d[key];
               result["label"] = d.name;
               result["isShown"] = _this.model.marker.data.filter.includes(d, dim);
               return result;
@@ -212,12 +212,13 @@ const Show = Component.extend({
             }
             this.apply.classed("vzb-disabled", !Object.keys(this.checkedDifference).length);
 
-            if (!this.previewShow[d.entities][d.category]) {
-              const show = this.model.state[d.entities].show;
-              this.previewShow[d.entities][d.category] = ((show[d.category] || ((show.$and || {})[d.category] || {})).$in || []).slice(0);
+            if (!this.previewShow[d.domain][d.category]) {
+              ////const show = this.model.state[d.domain].show;
+              this.previewShow[d.domain][d.category] = [];////((show[d.category] || ((show.$and || {})[d.category] || {})).$in || []).slice(0);
             }
-            const index = this.previewShow[d.entities][d.category].indexOf(d[d.category]);
-            index === -1 ? this.previewShow[d.entities][d.category].push(d[d.category]) : this.previewShow[d.entities][d.category].splice(index, 1);
+            const index = this.previewShow[d.domain][d.category].indexOf(d[d.category]);
+            index === -1 ? this.previewShow[d.domain][d.category].push(d[d.category]) : this.previewShow[d.domain][d.category].splice(index, 1);
+            if (!this.previewShow[d.domain][d.category].length) delete this.previewShow[d.domain][d.category];
           });
 
         items.append("label")
@@ -254,30 +255,17 @@ const Show = Component.extend({
 
 
   applyShowChanges() {
-    this.model.marker.clearSelected();
+    this.model.marker.encoding.get("selected").data.filter.clear();
 
     const setObj = {};
-    utils.forEach(this.previewShow, (showObj, entities) => {
-      const $and = [];
-      const $andKeys = [];
-      utils.forEach(showObj, (entitiesArray, category) => {
-        $andKeys.push(category);
-        if (entitiesArray.length) {
-          $and.push({ [category]: { $in: entitiesArray.slice(0) } });
-        }
-      });
-
-      utils.forEach(this.model.state[entities].show.$and || [this.model.state[entities].show], show$and => {
-        utils.forEach(show$and, (filter, key) => {
-          if (!$andKeys.includes(key)) {
-            $and.push(utils.deepClone(filter));
-          }
-        });
-      });
-
-      setObj[entities] = { show: $and.length > 1 ? { $and } : ($and[0] || {}) };
+    utils.forEach(this.previewShow, (showObj, domain) => {
+      if (Object.keys(showObj).length == 1 && Object.keys(showObj)[0] == domain) {
+        setObj[domain] = showObj[domain];
+      } else {
+        setObj[domain] = [showObj];
+      }
     });
-    this.model.set(setObj);
+    this.model.marker.data.filter.setDimensions(setObj);
   },
 
   showHideSearch() {
@@ -313,18 +301,21 @@ const Show = Component.extend({
     // //   showEquals = utils.comparePlainObjects(this.resetFilter[key] || {}, utils.find(spaceModels, model => model.dim === key).show);
     // //   return showEquals;
     // // });
-
-    return showEquals;
+    
+    // // return showEquals;
+    
+    return utils.comparePlainObjects(this.resetFilter, this.model.marker.data.filter.dimensions);
   },
 
   resetShow() {
-    const setProps = {};
-    const spaceModels = this.model.marker._space;
-    this.KEYS.forEach(key => {
-      const entities = utils.find(spaceModels, model => model.dim === key)._name;
-      setProps[entities] = { show: this.resetFilter[key] || {} };
-    });
-    this.model.set(setProps);
+    // // const setProps = {};
+    // // const spaceModels = this.model.marker._space;
+    // // this.KEYS.forEach(key => {
+    // //   const entities = utils.find(spaceModels, model => model.dim === key)._name;
+    // //   setProps[entities] = { show: this.resetFilter[key] || {} };
+    // // });
+    // // this.model.set(setProps);
+    this.model.marker.data.filter.setDimensions(this.resetFilter);
   },
 
   open() {

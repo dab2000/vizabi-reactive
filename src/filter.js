@@ -4,7 +4,8 @@ import { resolveRef } from './vizabi';
 
 const defaultConfig = {
     markers: {},
-    dimensions: {}
+    dimensions: {},
+    permanent: {}
 }
 
 export function filter(config = {}, parent) {
@@ -23,6 +24,12 @@ export function filter(config = {}, parent) {
         },
         get dimensions() {
             return toJS(this.config.dimensions);
+        },
+        setDimensions: action("setDimensions", function(dimensions) {
+            this.config.dimensions = dimensions;
+        }),
+        get permanent() {
+            return toJS(this.config.permanent);
         },
         has(d) {
             return this.markers.has(this.getKey(d));
@@ -57,16 +64,104 @@ export function filter(config = {}, parent) {
         getKey(d) {
             return isString(d) ? d : d[Symbol.for('key')];
         },
+        includes(d, dim, property) {           
+            const _property = property ? property : dim;
+            return ((this.normalizedDimFilter[dim] || {})[_property] || []).includes(d[_property]);
+        },
+        get normalizedDimFilter() {
+            const normFilter = {};
+
+            const dimFilters = new Map();
+
+            this.parent.space.forEach(dim => {
+                if (this.dimensions[dim]) {
+                    dimFilters.set(dim ,this.dimensions[dim]);
+                }            
+            })
+
+            dimFilters.forEach((dimFilter, dim) => {
+                normFilter[dim] = {};
+                const _simpleFilter = [];
+                dimFilter.forEach(filter => {
+                    if (!isString(filter)) {
+                        normFilter[dim] = filter;
+                    } else {
+                        _simpleFilter.push(filter);
+                    }
+                });
+                if (_simpleFilter.length) {
+                    if (normFilter[dim][dim]) {
+                        normFilter[dim][dim].push(..._simpleFilter);
+                    } else {
+                        normFilter[dim][dim] = _simpleFilter;
+                    }
+                }
+            });
+
+            return normFilter;
+        },
+        get joinClause() {
+            const join = {};
+
+            // dimension filters
+            const dimFilters = new Map();
+            const permanentFilters = new Map();
+            this.parent.space.forEach(dim => {
+                if (this.dimensions[dim]) {
+                    dimFilters.set(dim ,this.dimensions[dim]);
+                }
+                if (this.permanent[dim]) {
+                    permanentFilters.set(dim ,this.permanent[dim]);
+                }
+
+                if (dimFilters.has(dim) || permanentFilters.has(dim)) {
+                    join["$" + dim] = {
+                        key: dim,
+                        where: { "$and": [] }
+                    };
+                }
+            })
+
+            dimFilters.forEach((dimFilter, dim) => {
+                const _simpleFilter = [];
+                dimFilter.forEach(filter => {
+                    if (!isString(filter)) {
+                        const _filter = {};
+                        join["$" + dim].where["$and"].push({ "$or": [_filter] });
+                        Object.keys(filter).forEach(key => {
+                            _filter[key] = { "$in": filter[key] };
+                        });
+                    } else {
+                        _simpleFilter.push(filter);
+                    }
+                });
+                if (_simpleFilter.length) {
+                    join["$" + dim].where["$and"].push({ [dim]: { "$in": _simpleFilter } });
+                }
+            });
+
+            permanentFilters.forEach((filter, dim) => {
+                join["$" + dim].where["$and"].push(filter);
+            })
+
+            return join;
+        },
+
         get whereClause() {
             let filter = {};
 
             // dimension filters
             const dimFilters = [];
-            this.parent.space.forEach(dim => {
-                if (this.dimensions[dim]) {
-                    dimFilters.push(this.dimensions[dim]);
-                }
-            })
+
+            Object.keys(this.joinClause).forEach(key => {
+                dimFilters.push({ [key.slice(1)]: key });
+            });
+
+            // this.parent.space.forEach(dim => {
+            //     if (this.dimensions[dim]) {
+            //         dimFilters.push(this.dimensions[dim]);
+            //     }
+            // })
 
             // specific marker filters
             const markerFilters = [];
@@ -86,7 +181,7 @@ export function filter(config = {}, parent) {
             } else {
                 if (dimFilters.length > 0) {
                     // clean implicit $and
-                    filter = deepmerge.all(dimFilters);
+                    filter = { "$and": [deepmerge.all(dimFilters)] };
                 }
             }
 

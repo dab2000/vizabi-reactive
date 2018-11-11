@@ -125,12 +125,12 @@ const Select = Component.extend({
     this.model.time.getFrame(this.time, values => {
       if (!values) return;
 
-      const data = [..._this.model.marker.markerKeys].map(key => {
-        const labelObj = values.get(key).label;
+      const labelResponseMap = this.model.marker.encoding.get("label").data.responseMap;
+      const data = [...this.model.marker.markerKeys].map(([key, markerValues]) => {
         const d = {};
         d[Symbol.for("key")] = key;
         d.brokenData = false;
-        d.name = labelObj ? this.KEYS.map(key => labelObj[key]).join(",") : key;//_this.model.marker.getCompoundLabelText(d, values);
+        d.name = this.KEYS.map(key => labelResponseMap.get(key).get(markerValues[key])).join(",");//_this.model.marker.getCompoundLabelText(d, values);
         return d;
       });
 

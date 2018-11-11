@@ -36,7 +36,8 @@ export function labelDataConfig(cfg, parent) {
                             key: [key],
                             value: [this.concept]
                         },
-                        from: "entities"
+                        from: "entities",
+                        where: this.parent.marker.data.filter.permanent[key] || {}
                     }).then(data => ({
                         dim: key,
                         data,
@@ -58,6 +59,10 @@ export function labelDataConfig(cfg, parent) {
                 })
             });
             return lookups;
+        },
+        get responseMap() {
+            //trace();
+            return this.lookups;
         },
         addLabels(markers, encName) {
             // reduce lookups

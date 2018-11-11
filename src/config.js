@@ -111,10 +111,14 @@ export const config = {
                 space: ["geo", "time"],
                 filter: {
                     dimensions: {
+                        geo: [{
+                            geo: ["usa","rus","nga","chn"],
+                            "world_4region": ["asia"]
+                        }],
+                    },
+                    permanent: {
                         geo: {
-                            geo: {
-                                "$in": ["usa","chn","rus","nga"]
-                            }
+                            un_state: true
                         }
                     }
                 },
@@ -143,7 +147,7 @@ export const config = {
                     },
                     scale: {
                         modelType: "frame",
-                        domain: ['1950', '1980']
+                        //domain: ['1950', '1980']
                         }
                 },
                 "y": {
@@ -209,7 +213,7 @@ export const config = {
                         }
                     },
                     scale: {
-                        domain: ['1950', '1980']
+                        //domain: ['1950', '1980']
                     }
                 }
             }
