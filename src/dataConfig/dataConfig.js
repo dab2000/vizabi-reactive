@@ -103,7 +103,6 @@ export function dataConfig(config = {}, parent) {
 
             // where
             if (this.filter) {
-                query.join = (this.space.length == 1) ? {} : this.filter.joinClause;
                 query.where = (this.space.length == 1) ? this.filter.permanent[this.space[0]] || {} : this.filter.whereClause;
             }
             return query;

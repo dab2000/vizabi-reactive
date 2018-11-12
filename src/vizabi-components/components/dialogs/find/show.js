@@ -42,10 +42,6 @@ const Show = Component.extend({
 
     this.KEYS = this.model.marker.data.noFrameSpace;
     this.resetFilter = utils.deepClone(this.model.marker.data.filter.dimensions);
-    // // const spaceModels = this.model.marker._space;
-    // // this.KEYS.forEach(key => {
-    // //   this.resetFilter[key] = utils.find(spaceModels, model => model.dim === key).show;
-    // // });
 
     this.parentElement = this.parent.element;
     this.contentEl = this.element = d3.select(this.element.parentNode);
@@ -74,19 +70,8 @@ const Show = Component.extend({
   ready() {
     this._super();
     this.KEYS = this.model.marker.data.noFrameSpace;
-    //this.labelNames = this.model.marker.getLabelHookNames();
-    //const subHooks =  this.model.marker.getSubhooks(true);
-    this.previewShow = utils.deepClone(this.model.marker.data.filter.normalizedDimFilter);
+    this.previewShow = utils.deepClone(this.model.marker.data.filter.dimensions);
     this.checkedDifference = {};
-    // utils.forEach(this.labelNames, labelName => {
-    //   const entities = subHooks[labelName].getEntity();
-    //   const showFilter = this.previewShow[entities._name] = {};
-    //   utils.forEach(entities.show.$and || [entities.show], show$and => {
-    //     utils.forEach(show$and, (filter, key) => {
-    //       showFilter[key] = (filter.$in || []).slice(0);
-    //     });
-    //   });
-    // });
     this.redraw();
     this.showHideButtons();
 
@@ -212,13 +197,13 @@ const Show = Component.extend({
             }
             this.apply.classed("vzb-disabled", !Object.keys(this.checkedDifference).length);
 
-            if (!this.previewShow[d.domain][d.category]) {
-              ////const show = this.model.state[d.domain].show;
-              this.previewShow[d.domain][d.category] = [];////((show[d.category] || ((show.$and || {})[d.category] || {})).$in || []).slice(0);
+            const dotted = [d.domain] + "." + [d.category];
+            if (!this.previewShow[d.domain][dotted]) {
+              this.previewShow[d.domain][dotted] = [];
             }
-            const index = this.previewShow[d.domain][d.category].indexOf(d[d.category]);
-            index === -1 ? this.previewShow[d.domain][d.category].push(d[d.category]) : this.previewShow[d.domain][d.category].splice(index, 1);
-            if (!this.previewShow[d.domain][d.category].length) delete this.previewShow[d.domain][d.category];
+            const index = this.previewShow[d.domain][dotted].indexOf(d[d.category]);
+            index === -1 ? this.previewShow[d.domain][dotted].push(d[d.category]) : this.previewShow[d.domain][dotted].splice(index, 1);
+            if (!this.previewShow[d.domain][dotted].length) delete this.previewShow[d.domain][dotted];
           });
 
         items.append("label")
@@ -256,16 +241,7 @@ const Show = Component.extend({
 
   applyShowChanges() {
     this.model.marker.encoding.get("selected").data.filter.clear();
-
-    const setObj = {};
-    utils.forEach(this.previewShow, (showObj, domain) => {
-      if (Object.keys(showObj).length == 1 && Object.keys(showObj)[0] == domain) {
-        setObj[domain] = showObj[domain];
-      } else {
-        setObj[domain] = [showObj];
-      }
-    });
-    this.model.marker.data.filter.setDimensions(setObj);
+    this.model.marker.data.filter.setDimensions(this.previewShow);
   },
 
   showHideSearch() {
@@ -295,26 +271,10 @@ const Show = Component.extend({
   },
 
   hideResetButton() {
-    let showEquals = true;
-    // // const spaceModels = this.model.marker._space;
-    // // utils.forEach(this.KEYS, key => {
-    // //   showEquals = utils.comparePlainObjects(this.resetFilter[key] || {}, utils.find(spaceModels, model => model.dim === key).show);
-    // //   return showEquals;
-    // // });
-    
-    // // return showEquals;
-    
     return utils.comparePlainObjects(this.resetFilter, this.model.marker.data.filter.dimensions);
   },
 
   resetShow() {
-    // // const setProps = {};
-    // // const spaceModels = this.model.marker._space;
-    // // this.KEYS.forEach(key => {
-    // //   const entities = utils.find(spaceModels, model => model.dim === key)._name;
-    // //   setProps[entities] = { show: this.resetFilter[key] || {} };
-    // // });
-    // // this.model.set(setProps);
     this.model.marker.data.filter.setDimensions(this.resetFilter);
   },
 

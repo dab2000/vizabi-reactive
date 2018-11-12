@@ -110,11 +110,12 @@ export const config = {
                 source: "gap",
                 space: ["geo", "time"],
                 filter: {
+                    //markers: [{geo: "ind"}],
                     dimensions: {
-                        geo: [{
-                            geo: ["usa","rus","nga","chn"],
-                            "world_4region": ["asia"]
-                        }],
+                        geo: {
+                            "geo.geo": ["usa","rus","nga","chn"],
+                            //"geo.world_4region": ["asia"]
+                        },
                     },
                     permanent: {
                         geo: {

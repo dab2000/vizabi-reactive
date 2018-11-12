@@ -19,18 +19,37 @@ export function dotToJoin(query) {
 
             const joinid = "$" + key + i++;
             delete newq.where[p];
-            newq.where[key] = joinid;
+
+            if (!newq.where["$or"]) newq.where["$or"] = [];
+            newq.where["$or"].push({ [key]: joinid });
 
             if (!newq.join) newq.join = {};
-
             newq.join[joinid] = {
                 key: key,
                 where: {
-                    [value]: filter
+                    [value]: Array.isArray(filter) ? { "$in": filter } : filter
                 }
             }
         }
     });
+
+    //restrictive join for permanent filter
+    props.forEach(p => {
+        if (query.select.key.includes(p)) {
+            const filter = where[p];
+            
+            const joinid = "$" + p + i++;
+            delete newq.where[p];
+
+            newq.where[p] = joinid;
+
+            if (!newq.join) newq.join = {};
+            newq.join[joinid] = {
+                key: p,
+                where: filter
+            }
+        }
+    })
 
     console.log("Transformed query: ", query, newq);
     return newq;
