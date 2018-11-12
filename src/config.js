@@ -116,6 +116,9 @@ export const config = {
                             "geo.geo": ["usa","rus","nga","chn"],
                             //"geo.world_4region": ["asia"]
                         },
+                        // time: {
+                        //     "time": { "$eq": 2018 }
+                        // }
                     },
                     permanent: {
                         geo: {

@@ -68,6 +68,25 @@ export function filter(config = {}, parent) {
             const dotted = dim + "." + property;
             return this.dimensions[dim] && this.dimensions[dim][dotted] && this.dimensions[dim][dotted].includes(d[property]);
         },
+        get joinClause() {
+            const join = {};
+            const props = Object.keys(this.permanent);
+            //restrictive join for permanent filter
+            props.forEach(p => {
+                if (this.parent.noFrameSpace.includes(p)) {
+                    const filter = this.permanent[p];
+                    
+                    const joinid = "$" + p + "_";
+
+                    join[joinid] = {
+                        key: p,
+                        where: filter
+                    }
+                }
+            })
+
+            return join;
+        },
         get whereClause() {
             let filter = {};
 
@@ -77,9 +96,6 @@ export function filter(config = {}, parent) {
             this.parent.space.forEach(dim => {
                 if (this.dimensions[dim]) {
                     dimFilters.push(this.dimensions[dim]);
-                }
-                if (this.permanent[dim]) {
-                    dimFilters.push({ [dim]: this.permanent[dim] });
                 }
             })
 
@@ -106,6 +122,12 @@ export function filter(config = {}, parent) {
                     filter = deepmerge.all(dimFilters);
                 }
             }
+
+            //add where for permanent filter join
+            const joinKeys = Object.keys(this.joinClause);
+            joinKeys.forEach(key => {
+                filter[this.joinClause[key].key] = key;
+            });
 
             return filter;
         },
