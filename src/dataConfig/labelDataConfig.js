@@ -2,6 +2,7 @@ import { dataConfig } from './dataConfig';
 import { compose, renameProperty } from '../utils';
 import { observable, trace, toJS } from 'mobx';
 import { fromPromise } from 'mobx-utils';
+import { localeStore } from '../locale/localeStore';
 
 export function labelDataConfig(cfg, parent) {
     const dataPlain = dataConfig(cfg, parent);
@@ -30,6 +31,7 @@ export function labelDataConfig(cfg, parent) {
                     });
                 });
 
+                const langId = localeStore.get("locale").id;
                 const labelPromises = entities.map(({ source, key, domain }) =>
                     source.query({
                         select: {
@@ -37,7 +39,8 @@ export function labelDataConfig(cfg, parent) {
                             value: [this.concept]
                         },
                         from: "entities",
-                        where: this.parent.marker.data.filter.permanent[key] || {}
+                        where: this.parent.marker.data.filter.permanent[key] || {},
+                        language: langId
                     }).then(data => ({
                         dim: key,
                         data,
