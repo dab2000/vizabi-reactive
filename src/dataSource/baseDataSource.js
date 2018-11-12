@@ -79,16 +79,17 @@ const functions = {
         ]));
     },
     get conceptsPromise() {
+        if (this.conceptsAvailabilityPromise.state !== FULFILLED) return this.conceptsAvailabilityPromise;
         const langId = localeStore.get("locale").id;
-        return fromPromise(this.conceptsAvailabilityPromise.then(concepts => this.query({
+        return fromPromise(this.query({
                 select: {
                     key: ["concept"],
-                    value: [...concepts.map(c => c.value)]//["name", "domain", "concept_type"]
+                    value: [...this.conceptsAvailabilityPromise.value.map(c => c.value)]//["name", "domain", "concept_type"]
                 },
                 from: "concepts",
                 language: langId
             })
-        ));
+        );
     },
     get metaDataPromise() {
         return fromPromise(Promise.all([this.availabilityPromise, this.conceptsPromise]));
