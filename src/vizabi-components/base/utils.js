@@ -1027,10 +1027,10 @@ export const throttle = function(func, ms) {
   const wrapper = function() {
 
     wrapper.argumentsLast = savedArgs = arguments;
+    savedThis = this;
 
     if (nextTime > Date.now()) {
       throttled = true;
-      savedThis = this;
       return;
     }
 

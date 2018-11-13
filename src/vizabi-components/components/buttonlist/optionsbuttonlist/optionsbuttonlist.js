@@ -46,6 +46,8 @@ const OptionsButtonList = ButtonList.extend({
       btn.classed(class_active, button.active);
     });
 
+    this._super();
+
     this.buttonListComp.on("toggle", (evt, params) => {
       const btn = _this.element.selectAll(".vzb-buttonlist-btn");
       let visibleButton = 0;
@@ -56,8 +58,8 @@ const OptionsButtonList = ButtonList.extend({
         if (!isHidden) visibleButton++;
       });
     });
-
-    this._super();
+    this.buttonListComp._toggleButtons();
+    
   },
 
   proceedClick(id) {
