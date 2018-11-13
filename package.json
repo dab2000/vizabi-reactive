@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "Vizabi with mobx state",
     "scripts": {
-        "start": "webpack-serve --host 0.0.0.0"
+        "start": "webpack-serve --open"
     },
     "author": "",
     "license": "ISC",
