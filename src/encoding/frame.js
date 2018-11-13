@@ -18,14 +18,15 @@ const defaultConfig = {
 }
 
 const functions = {
-    get value() {    
+    get value() {
         let value = this.transaction.value == this.config.value ? 
             this.format.data.parse(this.config.value)
             :
             this.transaction.value;
         if (value != null) {
             const domain = this.scale.domain;
-            value = new Date(Math.min(Math.max(value, domain[0]), domain[1]));
+            const isEmptyDomain = domain[0] == undefined && domain[1] == undefined;
+            value = this.format.data.parse(this.format.data(isEmptyDomain ? value : Math.min(Math.max(value, domain[0]), domain[1])));
         }
         return value;
     },
@@ -62,7 +63,8 @@ const functions = {
     setValue: action('setValue', function(value, isTransaction) {
         if (value != null) {
             const domain = this.scale.domain;
-            value = new Date(Math.min(Math.max(value, domain[0]), domain[1]));
+            const isEmptyDomain = domain[0] == undefined && domain[1] == undefined;
+            value = this.format.data.parse(this.format.data(isEmptyDomain ? value : Math.min(Math.max(value, domain[0]), domain[1])));
         }
         this.transaction.value = value;
         if (!isTransaction) this.config.value = this.transaction.value = this.format.data(this.transaction.value);
