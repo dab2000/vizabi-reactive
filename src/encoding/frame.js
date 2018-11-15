@@ -41,7 +41,7 @@ const functions = {
     timeout: null,
     togglePlaying() {
         this.playing ?
-            this.stopPlaying() :
+            this.setValueAndStop() :
             this.startPlaying();
     },
     startPlaying: function() {
@@ -72,14 +72,14 @@ const functions = {
     }),
     setValueAndStop: action('setValueAndStop', function(value) {
         this.stopPlaying();
-        this.setValue(value);
+        this.setValue(value || this.value);
     }),
     update: action('update frame value', function() {
         if (this.playing && this.marker.dataPromise.state == FULFILLED) {
             const newValue = this.intervalAndStep.interval.offset(this.value, this.intervalAndStep.step);
-            this.setValue(newValue);
+            this.setValue(newValue, true);
             if (newValue > this.scale.domain[1])
-                this.stopPlaying();
+                this.setValueAndStop();
             // used for timeout instead of interval timing
             //else this.timeout = setTimeout(this.update.bind(this), this.speed);
         }
