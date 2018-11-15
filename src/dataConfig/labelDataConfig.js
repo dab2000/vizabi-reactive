@@ -16,13 +16,13 @@ export function labelDataConfig(cfg, parent) {
             return [...sources];    
         },
         get promise() {
+            const entityDims = this.space.filter(dim => this.source.isEntityConcept(dim));
             return fromPromise(Promise.all(this.markerSources.map(s => s.conceptsPromise)).then(() => {
-                const entityDims = this.space.filter(dim => this.source.isEntityConcept(dim));
-
                 const entities = entityDims.map(dim => ({ 
                     source: this.source,
                     key: dim 
                 }));
+
                 this.markerSources.map(s => {
                     s.availability.data.map(({key, value}) => {
                         if (key.length == 1 && entityDims.includes(key[0]) && s.isEntityConcept(value)) {

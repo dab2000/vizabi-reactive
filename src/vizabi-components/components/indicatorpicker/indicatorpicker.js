@@ -224,8 +224,8 @@ const IndPicker = Component.extend({
     } else {
 
       // targetModel is marker
-      const dataManager = targetModel._root.dataManager;
-      selectText = targetModel.space.map(dim => dataManager.getConceptProperty(targetModel._space[dim].dim, "name")).join(", ");
+      //const dataManager = targetModel._root.dataManager;
+      selectText = targetModel.data.space.map(dim => targetModel.data.source.getConcept(dim)["name"]).join(", ");
 
     }
 

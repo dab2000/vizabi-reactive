@@ -108,5 +108,8 @@ export function dataConfig(config = {}, parent) {
             }
             return query;
         },
+        get allow() {
+            return this.config.allow;
+        }    
     };
 }

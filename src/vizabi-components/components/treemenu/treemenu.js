@@ -578,14 +578,13 @@ const TreeMenu = Component.extend({
     this._targetModel = input;
     //this._targetModel.on("change", this.change);
     //if (this._targetModel.isHook()) {
-    if (this._targetModel.marker) {
-        this._targetProp = "which";
-    } else {
-    //if (this._targetModel instanceof Marker) {
+    if (this._targetModel.isEncoding) {
+      this._targetProp = "which";
+    } else if (this._targetModel.isMarker) {
       this._targetProp = "space";
     }
     this._targetModelDisposer = reaction(() => {
-      if (this._targetModel.marker) {
+      if (this._targetModel.isEncoding) {
         const concept = this._targetModel.data.concept;
         const scaleType = this._targetModel.scale.type;
       }
@@ -659,14 +658,13 @@ const TreeMenu = Component.extend({
     //options
     this.OPTIONS = utils.deepClone(OPTIONS);
 
-    this.change = this.change.bind(this);
+    // // this.change = this.change.bind(this);
   },
 
-  change(evt, path) {
-    //if (path.indexOf("." + this._targetProp) == -1 && (!this._targetModel.isHook() || path.indexOf(".scaleType") == -1)) return;
-    const scaleType = 
-    this.updateView();
-  },
+  // // change(evt, path) {
+  // //   if (path.indexOf("." + this._targetProp) == -1 && (!this._targetModel.isHook() || path.indexOf(".scaleType") == -1)) return;
+  // //   this.updateView();
+  // // },
 
   ready() {
     const tags = this.model.dataSources.getTags()
@@ -876,11 +874,11 @@ const TreeMenu = Component.extend({
     /**
      * KEY-AVAILABILITY (dimensions for space-menu)
      */
-    this.model.marker.spaceAvailability.forEach((space, str) => {
+    this.model.marker.spaceAvailability.forEach(space => {
       indicatorsTree.children.push({
-        id: str,
-        name: space.map(dim => dim.name).join(", "),
-        name_catalog: space.map(dim => dim.name).join(", "),
+        id: space.join(","),
+        name: space.join(","),//,space.map(dim => dim.name).join(", "),
+        name_catalog: space.join(","),//,space.map(dim => dim.name).join(", "),
         description: "no description",
         dataSource: "All data sources",
         type: "space"
@@ -1081,7 +1079,7 @@ const TreeMenu = Component.extend({
     });
 
     this.width = _this.element.node().offsetWidth;
-    
+
     return this;
   },
 
@@ -1235,7 +1233,7 @@ const TreeMenu = Component.extend({
   redraw(data, useDataFiltered) {
     const _this = this;
 
-    const isHook = !!_this._targetModel.marker; //isHook();
+    const isHook = _this._targetModel.isEncoding; //isHook();
 
     let dataFiltered, allowedIDs;
 
@@ -1257,28 +1255,28 @@ const TreeMenu = Component.extend({
       if (isHook) {
         allowedIDs = utils.keys(indicatorsDB).filter(f => {
           //check if indicator is denied to show with allow->names->!indicator
-          if (_this._targetModel.allow && _this._targetModel.allow.names) {
-            if (_this._targetModel.allow.names.indexOf("!" + f) != -1) return false;
-            if (_this._targetModel.allow.names.indexOf(f) != -1) return true;
-            if (_this._targetModel.allow.namesOnlyThese) return false;
+          if (_this._targetModel.data.allow && _this._targetModel.data.allow.names) {
+            if (_this._targetModel.data.allow.names.indexOf("!" + f) != -1) return false;
+            if (_this._targetModel.data.allow.names.indexOf(f) != -1) return true;
+            if (_this._targetModel.data.allow.namesOnlyThese) return false;
           }
           //keep indicator if nothing is specified in tool properties
-          if (!_this._targetModel.allow || !_this._targetModel.allow.scales) return true;
+          if (!_this._targetModel.data.allow || !_this._targetModel.data.allow.scales) return true;
           //keep indicator if any scale is allowed in tool properties
-          if (_this._targetModel.allow.scales[0] == "*") return true;
+          if (_this._targetModel.data.allow.scales[0] == "*") return true;
 
           // if no scales defined, all are allowed
           if (!indicatorsDB[f].scales) return true;
 
           //check if there is an intersection between the allowed tool scale types and the ones of indicator
           for (let i = indicatorsDB[f].scales.length - 1; i >= 0; i--) {
-            if (_this._targetModel.allow.scales.indexOf(indicatorsDB[f].scales[i]) > -1) return true;
+            if (_this._targetModel.data.allow.scales.indexOf(indicatorsDB[f].scales[i]) > -1) return true;
           }
 
           return false;
         });
-        dataFiltered = utils.pruneTree(data, f => allowedIDs.indexOf(f.id) > -1);
-      } else if (_this._targetModel instanceof Marker) {
+        dataFiltered = utils.pruneTree(data, f => f.type != "space" && allowedIDs.indexOf(f.id) > -1);
+      } else if (_this._targetModel.isMarker) {
         allowedIDs = data.children.map(child => child.id);
         dataFiltered = utils.pruneTree(data, f => f.type == "space");
       } else {
@@ -1296,8 +1294,8 @@ const TreeMenu = Component.extend({
       title = this._title;
     } else {
       title = this.translator(
-        !_this._targetModel.marker ? _this._targetModel._root._name + "/" + _this._targetModel._name
-          : "buttons/" + (isHook ? _this._targetModel._name : (targetModelType + "/" + _this._targetProp))
+        _this._targetModel.isMarker ? _this.root._name || "marker" + "/" + _this.root.model.marker.getId(_this._targetModel) :
+        "buttons/" + (isHook ? _this._targetModel._name : (targetModelType + "/" + _this._targetProp))
       );
     }
     this.element.select("." + css.title).select("span")
@@ -1424,9 +1422,9 @@ const TreeMenu = Component.extend({
         return true;
       }
       const scaleTypesData = isHook ? indicatorsDB[pointer].scales.filter(f => {
-        if (!_this._targetModel.allow || !_this._targetModel.allow.scales) return true;
-        if (_this._targetModel.allow.scales[0] == "*") return true;
-        return _this._targetModel.allow.scales.indexOf(f) > -1;
+        if (!_this._targetModel.data.allow || !_this._targetModel.data.allow.scales) return true;
+        if (_this._targetModel.data.allow.scales[0] == "*") return true;
+        return _this._targetModel.data.allow.scales.indexOf(f) > -1;
       }) : [];
       if (scaleTypesData.length == 0) {
         this.element.select("." + css.scaletypes).classed(css.hidden, true);

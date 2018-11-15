@@ -1,7 +1,7 @@
-import { trace, computed, observable, toJS } from 'mobx';
+import { trace, computed, observable, toJS, action } from 'mobx';
 import { encodingStore } from '../encoding/encodingStore'
 import { dataSourceStore } from '../dataSource/dataSourceStore'
-import { assign, createMarkerKey, applyDefaults, isString, intersect } from "../utils";
+import { assign, createMarkerKey, applyDefaults, isString, intersect, deepmerge } from "../utils";
 import { configurable } from '../configurable';
 import { fromPromise, FULFILLED } from 'mobx-utils'
 import { resolveRef } from '../vizabi';
@@ -145,7 +145,12 @@ let functions = {
             else {
                 markerKeysMap.set(row[Symbol.for("key")], row);
             };
-    }
+    },
+    get isMarker() { return true; },
+    setSpace: action("setSpace", function(space) {
+        this.config.data.space = space;
+        this.config.data.filter.dimensions = deepmerge.all(space.map(dim => ({[dim]: {}})));
+    })
 }
 
 export function baseMarker(config) {

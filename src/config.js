@@ -156,7 +156,8 @@ export const config = {
                 },
                 "y": {
                     data: {
-                        concept: "income_per_person_gdppercapita_ppp_inflation_adjusted"
+                        concept: "income_per_person_gdppercapita_ppp_inflation_adjusted",
+                        allow: { scales: ["linear", "log"] }
                     },
                     // data: {
                     //     concept: "life_expectancy",
@@ -164,7 +165,7 @@ export const config = {
                     // },
                     scale: {
                         type: "log"
-                    }
+                    },
                 },
                 "order": {
                     modelType: "order",
@@ -247,7 +248,7 @@ export const config = {
             "popup": ["colors", "find", "moreoptions"],
             "sidebar": ["colors", "find"],
             "moreoptions": ["opacity", "speed", "axes", "colors", "presentation", "about"],
-            "dialog": {"find": {"panelMode": "show"}},
+            "dialog": {"find": {"panelMode": "show", "enablePicker": true}},
             "modelConfig": {
                 "marker": "marker:bubble",
                 "frame": "marker:bubble.encoding:frame",
