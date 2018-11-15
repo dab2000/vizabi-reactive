@@ -584,13 +584,13 @@ const TreeMenu = Component.extend({
       this._targetProp = "space";
     }
     this._targetModelDisposer = reaction(() => {
-      if (this._targetModel.isEncoding) {
-        const concept = this._targetModel.data.concept;
-        const scaleType = this._targetModel.scale.type;
-      }
-      const space = this._targetModel.data.space;
-      return true;
-    }, this.updateView);
+      const props = [this.getTargetProp()];
+      if (this._targetModel.isEncoding)
+        props.push(this._targetModel.scale.type);
+      return props;
+    }, () => {
+      this.updateView();
+    });
     return this;
   },
   targetProp(input) {
@@ -1364,7 +1364,7 @@ const TreeMenu = Component.extend({
             });
           }
 
-          if (d.id == _this._targetModel[_this._targetProp]) {
+          if (d.id == _this.getTargetProp()) {
             let parent;
             if (_this.selectedNode && toplevel) {
               parent = _this.selectedNode.parentNode;
@@ -1414,7 +1414,8 @@ const TreeMenu = Component.extend({
 
     if (!useDataFiltered) {
       let pointer = "_default";
-      if (allowedIDs.indexOf(this._targetModel[_this._targetProp]) > -1) pointer = this._targetModel[_this._targetProp];
+      const prop = this.getTargetProp();
+      if (allowedIDs.indexOf(prop) > -1) pointer = prop;
       if (!indicatorsDB[pointer]) utils.error("Concept properties of " + pointer + " are missing from the set, or the set is empty. Put a breakpoint here and check what you have in indicatorsDB");
 
       if (!indicatorsDB[pointer].scales) {
@@ -1442,7 +1443,7 @@ const TreeMenu = Component.extend({
           })
           .merge(scaleTypes);
 
-        const mdlScaleType = _this._targetModel.scaleType;
+        const mdlScaleType = _this._targetModel.scale.type;
 
         scaleTypes
           .classed(css.scaletypesDisabled, scaleTypesData.length < 2 || _this._scaletypeSelectorDisabled)
@@ -1492,12 +1493,18 @@ const TreeMenu = Component.extend({
 
   _setModel(what, value) {
 
-    value.value = {concept: value.concept};
-
     const mdl = this._targetModel;
-    if (what == "which") mdl.setWhich(value);
+    if (what == "which") {
+      value.value = {concept: value.concept};
+      mdl.setWhich(value);
+    }
     if (what == "scaleType") mdl.setScaleType(value);
     if (what == "space") mdl.setSpace(value.concept.split(","));
+  },
+
+  getTargetProp() {
+    return this._targetModel.isEncoding ? this._targetModel.data.concept :
+    this._targetModel.isMarker ? this._targetModel.data.space :  this._targetModel[this._targetProp];
   }
 
 });

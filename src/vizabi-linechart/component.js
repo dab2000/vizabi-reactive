@@ -162,18 +162,36 @@ const LCComponent = Component.extend("linechart", {
     reaction(() => ({
       h: this.model.marker.encoding.get("highlighted").data.filter.any(),
       s: this.model.marker.encoding.get("selected").data.filter.any()
-      }),
-      (propValue) => {
-        if (!_this._readyOnce) return;
-        _this.highlightLines();
-      });
+      }), (propValue) => {
+      if (!_this._readyOnce) return;
+      _this.highlightLines();
+    });
 
     reaction(() => [this.model.ui.config.opacitySelectDim,
       this.model.ui.config.opacityRegular], () => {
-        if (!_this._readyOnce) return;
-        _this.highlightLines();
-      });
+      if (!_this._readyOnce) return;
+      _this.highlightLines();
+    });
 
+    reaction(() => {
+      const encY = this.model.marker.encoding.get("y");
+      return [
+        encY.scale.type, 
+        encY.scale.domainMin,
+        encY.scale.domainMax,
+        encY.scale.zoomedMin,
+        encY.scale.zoomedMax
+      ]
+    }, () => {
+      if (!_this.all_values || !_this.values) return;
+      _this.updateIndicators();
+      _this.updateShow();
+      _this.zoomToMaxMin();
+      _this.updateSize();
+      _this.updateTime();
+      _this.redrawDataPoints();
+      _this.highlightLines();          
+    });
 
     this.xScale = null;
     this.yScale = null;

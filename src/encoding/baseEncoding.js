@@ -102,6 +102,9 @@ const functions = {
         this.config.scale.range = null;
         this.config.scale.type = null;
     }),
+    setScaleType: action("setScaleType", function(value) {
+        this.config.scale.type = value;
+    })
 }
 
 export function baseEncoding(config, parent) {
