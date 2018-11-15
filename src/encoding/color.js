@@ -1,5 +1,6 @@
 import { baseEncoding } from './baseEncoding';
-import { defaultDecorator } from '../utils';
+import { defaultDecorator, deepmerge } from '../utils';
+import { action, trace } from 'mobx';
 
 const defaultPalettes = {
     "_continuous": {
@@ -40,12 +41,9 @@ export const color = defaultDecorator({
     defaultConfig,
     functions: {
         get palette() {
-            return this.getDefaultPalette();
+            return deepmerge(this.defaultPalette, this.config.palette);
         },
-        get paletteLabels() {
-            return this.getPaletteLabels();
-        },
-        getDefaultPalette() {
+        get defaultPalette() {
             const conceptpropsColor = this.data.conceptProps.color;
             let palette;
         
@@ -75,8 +73,8 @@ export const color = defaultDecorator({
   
             return palette;
         },
-        getPaletteLabels() {
-            const conceptpropsColor = this.data.conceptProps.color;
+        get paletteLabels() {
+          const conceptpropsColor = this.data.conceptProps.color;
             let paletteLabels = null;
         
             if (conceptpropsColor && conceptpropsColor.paletteLabels) {
@@ -98,6 +96,10 @@ export const color = defaultDecorator({
             const shade = args.shadeID && conceptpropsColor && conceptpropsColor.shades && conceptpropsColor.shades[args.shadeID] ? conceptpropsColor.shades[args.shadeID] : 0;
         
             return this.palette[args.colorID][shade];
-        }
+        },
+        setColor: action(function (value, pointer) {
+          this.config.palette[pointer] = value;
+        }),
+      
     }
 });

@@ -90,8 +90,17 @@ const ColorLegend = Component.extend({
         } else {
           this.updateGroupsOpacity();
         }
-      })
+      });
 
+    reaction(() => this.model.marker.encoding.get("color").palette, palette => {
+      if (!_this._readyOnce || (_this.colorModel.scale.isDiscrete && !_this.frame)) return;
+      _this.updateView();
+    });
+
+    reaction(() => this.model.marker.encoding.get("color").scale.type, scaleType => {
+      if (!_this._readyOnce || _this.colorModel.scale.isDiscrete) return;
+      _this.updateView();
+    });
   },
 
   readyOnce() {
@@ -135,7 +144,7 @@ const ColorLegend = Component.extend({
         d3.select(this.root.element)
     );
 
-    this.colorPicker.translate(this.model.locale.getTFunction());
+    //this.colorPicker.translate(this.model.locale.getTFunction());
     this._initSelectDialog();
   },
 
@@ -145,7 +154,7 @@ const ColorLegend = Component.extend({
 
     this.selectDialog = this.listColorsEl.append("div").classed("vzb-cl-select-dialog vzb-hidden", true);
     this._initSelectDialogItems();
-    this._translateSelectDialog(this.model.locale.getTFunction());
+    //this._translateSelectDialog(this.model.locale.getTFunction());
   },
 
   _initSelectDialogItems() {
@@ -209,6 +218,9 @@ const ColorLegend = Component.extend({
     this.KEY = this.KEYS.join(",");
     this.colorlegendDim = this.KEY;
     this.canShowMap = false;
+
+    _this._translateSelectDialog(_this.model.locale.getTFunction());
+    _this.colorPicker.translate(_this.model.locale.getTFunction());
 
     if (this.colorModel.scale.isDiscrete && this.colorModel.data.conceptProps.use !== "constant" && this.model.legendMarker) {
       //if (!this.model.legendMarker._ready) return;
@@ -471,7 +483,7 @@ const ColorLegend = Component.extend({
   },
 
   _updateSelectDialog() {
-    const isColorSelectable = utils.getProp(this.colorModel.data.conceptProps, ["color", "selectable"], false);
+    const isColorSelectable = utils.getProp(this.colorModel.data.conceptProps, ["color", "selectable"], true);
     this.editColorButtonTooltip.classed("vzb-hidden", isColorSelectable);
     this.editColorButton.classed("vzb-cl-select-dialog-item-disabled", !isColorSelectable);
 
@@ -525,11 +537,11 @@ const ColorLegend = Component.extend({
       },
       clickToChangeColor(d, i) {
         //disable interaction if so stated in concept properties
-        if (!utils.getProp(_this.colorModel.data.conceptProps, ["color", "selectable"], false)) return;
+        if (!utils.getProp(_this.colorModel.data.conceptProps, ["color", "selectable"], true)) return;
         const palette = _this.colorModel.palette;
-        const defaultPalette = _this.colorModel.getDefaultPalette();
+        const defaultPalette = _this.colorModel.defaultPalette;
         const view = d3.select(this);
-        const target = !_this.colorModel.isDiscrete() ? d.paletteKey : d[colorlegendDim];
+        const target = !_this.colorModel.scale.isDiscrete ? d.paletteKey : d[colorlegendDim];
         _this.colorPicker
           .colorOld(palette[target])
           .colorDef(defaultPalette[target])

@@ -193,6 +193,11 @@ const LCComponent = Component.extend("linechart", {
       _this.highlightLines();          
     });
 
+    reaction(() => this.model.marker.encoding.get("color").palette, palette => {
+      if (!_this._readyOnce) return;
+      this.updateColors();
+    });
+
     this.xScale = null;
     this.yScale = null;
 
@@ -577,15 +582,18 @@ const LCComponent = Component.extend("linechart", {
   },
 
   updateColors() {
-    const _this = this;        
-    const dataKeys = this.dataKeys = this.model.marker.getDataKeysPerHook();
-    const valuesColor = this.values.color;
+    const _this = this;
+    const KEY = this.KEY;
+     
+    //const dataKeys = this.dataKeys = this.model.marker.getDataKeysPerHook();
+    //const valuesColor = this.values.color;
     
     this.cScale = this.model.marker.encoding.get("color").scale.d3Scale;
     
     this.entityLabels.each(function(d, index) {
       const entity = d3.select(this);
-      const {color, colorShadow} = _this.getColorsByValue(valuesColor[utils.getKey(d, dataKeys.color)]);
+      //const {color, colorShadow} = _this.getColorsByValue(valuesColor[utils.getKey(d, dataKeys.color)]);
+      const {color, colorShadow} = _this.getColorsByValue(_this.dataHash[d[KEY]].values[0].color);
 
       entity.select("circle").style("fill", color);
       entity.select(".vzb-lc-labelfill")
@@ -596,7 +604,8 @@ const LCComponent = Component.extend("linechart", {
 
     this.entityLines.each(function(d, index) {
       const entity = d3.select(this);
-      const {color, colorShadow} = _this.getColorsByValue(valuesColor[utils.getKey(d, dataKeys.color)]);
+      //const {color, colorShadow} = _this.getColorsByValue(valuesColor[utils.getKey(d, dataKeys.color)]);
+      const {color, colorShadow} = _this.getColorsByValue(_this.dataHash[d[KEY]].values[0].color);
       
       entity.select(".vzb-lc-line").style("stroke", color);
       entity.select(".vzb-lc-line-shadow").style("stroke", colorShadow);
