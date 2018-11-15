@@ -80,14 +80,13 @@ const functions = {
     },
     get conceptsPromise() {
         if (this.conceptsAvailabilityPromise.state !== FULFILLED) return this.conceptsAvailabilityPromise;
-        const langId = localeStore.get("locale").id;
         return fromPromise(this.query({
                 select: {
                     key: ["concept"],
                     value: [...this.conceptsAvailabilityPromise.value.map(c => c.value)]//["name", "domain", "concept_type"]
                 },
                 from: "concepts",
-                language: langId
+                language: localeStore.get("locale").id
             })
         );
     },
@@ -153,7 +152,8 @@ const functions = {
                 key: ["tag"],
                 value: ["name", "parent"]
             },
-            from: "entities"
+            from: "entities",
+            language: localeStore.get("locale").id
         });
     },
     getTags() {

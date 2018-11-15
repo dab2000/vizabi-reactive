@@ -3,6 +3,7 @@ import { dataSourceStore } from "../dataSource/dataSourceStore";
 import { trace, observable, toJS } from "mobx";
 import { createMarkerKey, arrayEquals, deepmerge, applyDefaults, intersect, isEntityConcept } from "../utils";
 import { filter } from "../filter";
+import { localeStore } from "../locale/localeStore";
 
 const defaultConfig = {
     source: null,
@@ -106,6 +107,9 @@ export function dataConfig(config = {}, parent) {
                 if (this.space.length > 1) query.join = this.filter.joinClause;
                 query.where = (this.space.length == 1) ? this.filter.permanent[this.space[0]] || {} : this.filter.whereClause;
             }
+            //language
+            query.language = localeStore.get("locale").id;
+
             return query;
         },
         get allow() {
