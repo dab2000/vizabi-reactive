@@ -4,16 +4,15 @@ import { action } from 'mobx';
 import { encodingStore } from '../encoding/encodingStore';
 
 const defaultConfig = {
-    important: ["x", "y", "size"],
+    important: ["x", "y"],
     encoding: {
         x: { scale: { modelType: "x" } },
         y: { scale: { modelType: "y" } },
-        color: { scale: { modelType: "color" } },
-        size: { scale: { modelType: "size" } }
+        color: { scale: { modelType: "color" } }
     }
 }
 
-export function bubble(config) {
+export function line(config) {
     const base = baseMarker(config);
 
     applyDefaults(config, defaultConfig);
@@ -38,4 +37,4 @@ export function bubble(config) {
 
 }
 
-bubble.decorate = baseMarker.decorate;
+line.decorate = baseMarker.decorate;

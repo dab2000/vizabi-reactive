@@ -105,7 +105,7 @@ export const config = {
             },
         },
         "bubble": {
-            modelType: "bubble",
+            modelType: "line",
             data: {
                 source: "gap",
                 space: ["geo", "time"],
@@ -138,7 +138,6 @@ export const config = {
                     }
                 }*/
             },
-            important: ["x", "y"],
             encoding: {
                 "selected": {
                     modelType: "selection",
@@ -167,28 +166,29 @@ export const config = {
                         type: "log"
                     },
                 },
-                "order": {
-                    modelType: "order",
-                    data: {
-                        ref: "marker.bubble.encoding.size.data",
-                        direction: "descending"
-                    }
-                },
-                "size": {
-                    modelType: "size",
-                    data: {
-                        concept: "population_total"
-                    },
-                    scale: {
-                        type: "sqrt",
-                        range: [0, 50]
-                    }
-                },
+                // "order": {
+                //     modelType: "order",
+                //     data: {
+                //         ref: "marker.bubble.encoding.size.data",
+                //         direction: "descending"
+                //     }
+                // },
+                // "size": {
+                //     modelType: "size",
+                //     data: {
+                //         concept: "population_total"
+                //     },
+                //     scale: {
+                //         type: "sqrt",
+                //         range: [0, 50]
+                //     }
+                // },
                 "color": {
                     modelType: "color",
                     data: {
                         space: ["geo"],
-                        concept: "world_4region"
+                        concept: "world_4region",
+                        allow: { scales: ["ordinal"] }
                     },
                     scale: {
                         type: "ordinal"
@@ -209,7 +209,7 @@ export const config = {
                     interpolate: true,
                     speed: 100,
                     trail: {
-                        show: true,
+                        show: false,
                         starts: {},
                         data: {
                             filter: {

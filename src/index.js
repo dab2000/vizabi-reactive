@@ -549,7 +549,8 @@ function chart() {
 
 
             // create selects
-            const encs = ["x", "y", "size", "color"];
+            //const encs = ["x", "y", "size", "color"];
+            const encs = ["x", "y", "color"];
             const divsUpdate = d3.select('#encodingcontrol')
                 .selectAll('div')
                 .data(encs);
