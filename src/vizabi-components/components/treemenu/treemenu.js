@@ -841,12 +841,12 @@ const TreeMenu = Component.extend({
       const use = entry.concept == "_default" ? "constant" : (kvPair.key.length > 1 || entry.concept_type === "time" ? "indicator" : "property");
       const concept = { id: entry.concept, key: kvPair.key, name: entry.name, name_catalog: entry.name_catalog, description: entry.description, dataSource: sourceName, use };
 
-      if (properties && kvPair.key.length == 1 && entry.concept != "_default" && entry.concept_type != "time") {
+      if (properties && kvPair.key[0] !== "concept" && kvPair.key.length == 1 && entry.concept != "_default" && entry.concept_type != "time") {
 
-        const folderName = kvPair.key[0].concept + "_properties";
+        const keyConcept = kvPair.source.concepts.get(kvPair.key[0]);
+        const folderName = keyConcept.concept + "_properties";
         if (!tags[folderName]) {
-          const dim = kvPair.key[0];
-          tags[folderName] = { id: folderName, name: dim.name + " properties", type: "folder", children: [] };
+          tags[folderName] = { id: folderName, name: keyConcept.name + " properties", type: "folder", children: [] };
           tags[ROOT].children.push(tags[folderName]);
         }
         tags[folderName].children.push(concept);
