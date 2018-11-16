@@ -638,7 +638,7 @@ function exitHandler(emulateClickFunc) {
     if (!this.resizeInExitHandler) {
       emulateClickFunc();
     } else {
-      this.root.ui.resizeHandler();
+      this.root.model.ui.resizeHandler();
     }
   }
 }
