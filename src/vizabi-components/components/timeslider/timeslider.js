@@ -155,7 +155,17 @@ const TimeSlider = Component.extend({
           //only set handle position if change is external
           if (!this.dragging) this._setHandle(this.model.time.playing);
         }
-      })
+      });
+
+    reaction(() => this.model.time.scale.domain,
+      domain => {
+        if (!this.isReady()) return;
+        if (_this.slide) {
+          //only set handle position if change is external
+          if (!_this.model.time.dragging) _this._setHandle(_this.model.time.playing);
+          _this.ready();
+        }
+      });
 
     this.profiles = utils.deepClone(profiles);
     this.presentationProfileChanges = utils.deepClone(presentationProfileChanges);

@@ -148,13 +148,13 @@ function chart() {
         }
     }
     */
-    const updateSize = action("wrapper size", function(e) {
-        var wrap = document.getElementById("wrapper");
-        appState.wrapper.height = wrap.clientHeight;
-        appState.wrapper.width = wrap.clientWidth;
-    });
-    window.addEventListener("resize", updateSize);
-    updateSize();
+    // const updateSize = action("wrapper size", function(e) {
+    //     var wrap = document.getElementById("wrapper");
+    //     appState.wrapper.height = wrap.clientHeight;
+    //     appState.wrapper.width = wrap.clientWidth;
+    // });
+    // window.addEventListener("resize", updateSize);
+    // updateSize();
 
     autorun(setupTimecontrol);
     //autorun(drawBubbles);
@@ -166,8 +166,8 @@ function chart() {
     //drawChart();
     //drawLegend();
 
-    let zoomScales;
-    setupZoom();
+    //let zoomScales;
+    //setupZoom();
 
     function setupZoom() {
 

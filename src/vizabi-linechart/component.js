@@ -10,7 +10,7 @@ const {
     question: iconQuestion
   }
 } = Vizabi;
-import { autorun, action, when, reaction, spy, observable } from 'mobx';
+import { autorun, action, when, reaction, spy, observable, runInAction } from 'mobx';
 import { FULFILLED } from "mobx-utils";
 
 
@@ -196,6 +196,21 @@ const LCComponent = Component.extend("linechart", {
     reaction(() => this.model.marker.encoding.get("color").palette, palette => {
       if (!_this._readyOnce) return;
       this.updateColors();
+    });
+
+    reaction(() => this.model.marker.encoding.get("x").scale.config.domain, domain => {
+      runInAction(() => {
+        this.model.time.scale.config.domain = domain
+      });
+    });
+    reaction(() => this.model.marker.encoding.get("frame").scale.config.domain, domain => {
+      if (!this.isReady() || !this.all_values || !this.values) return;
+      this.updateIndicators();
+      this.updateShow();
+      this.zoomToMaxMin();
+      this.updateSize();
+      this.redrawDataPoints();
+      this.highlightLines();        
     });
 
     this.xScale = null;
@@ -1113,6 +1128,7 @@ const LCComponent = Component.extend("linechart", {
       if (!_this._frameIsValid(data)) return;
       //const nearestKey = _this.getNearestKey(_this.yScale.invert(mousePos), data.axis_y);
       const nearestKey = _this.getNearestKey(mousePos, _this.dataHash, utils.mapToObj(data), "y", _this.yScale.bind(_this));
+      if (!data.has(nearestKey)) return;
       resolvedValue = data.get(nearestKey)["y"];
       me = _this.dataHash[nearestKey];
       const highlightedEnc = _this.model.marker.encoding.get("highlighted");
@@ -1302,12 +1318,10 @@ const LCComponent = Component.extend("linechart", {
   getNearestKey(val, obj, values, propName, fn) {
     //const startTime = new Date();
     const KEYS = this.KEYS;
-    let keys = Object.keys(obj);
+    let keys = Object.keys(values);
 
     if (this.someSelected && this.nonSelectedOpacityZero) {
-      keys = this.model.marker.select.map(keyObj => {
-        return utils.getKey(keyObj, KEYS);
-      });
+      keys = [...this.model.marker.encoding.get("selected").data.filter.markers.keys()].filter(key => values[key]);
     }
     let resKey = keys[0];
     for (let i = 1; i < keys.length; i++) {

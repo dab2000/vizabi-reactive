@@ -1,5 +1,6 @@
 import * as utils from "base/utils";
 import Component from "base/component";
+import { runInAction } from "mobx";
 
 /*!
  * VIZABI MIN MAX INPUT FIELDS
@@ -141,7 +142,19 @@ const MinMaxInputs = Component.extend({
   },
 
   _setModel(what, value) {
-    this.model.marker[this.markerID][what] = utils.strToFloat(value);
+    const _this = this;
+    const formatter = function(n) {
+      if (!n && n !== 0) return n;
+      if (utils.isDate(n)) return _this.model.time.format.data(n);
+      return d3.format(".2r")(n);
+    };
+    const domainIndex = what == DOMAINMAX ? 1 : 0;
+
+    const domain = this.model.marker.encoding.get(this.markerID).scale.domain.map(formatter);
+    domain[domainIndex] = utils.strToFloat(value);
+    runInAction(() => {
+      this.model.marker.encoding.get(this.markerID).scale.config.domain = domain
+    });
   }
 
 });
