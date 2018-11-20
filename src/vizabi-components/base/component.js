@@ -20,8 +20,6 @@ const Component = Events.extend({
    */
   init(config, parent) {
 
-    this.readyPromise = computed(() => fromPromise(this.getReadyPromise()));
-
     this._id = this._id || utils.uniqueId("c");
     this._ready = false;
     this._readyOnce = false;
@@ -49,6 +47,10 @@ const Component = Events.extend({
     this.model_expects = this.model_expects || [];
     this.model_binds   = this.model_binds || {};
     this.createModel(config.model);
+
+    this.readyPromise = computed(() => fromPromise(Promise.all(
+        //map data connected promises
+        this.model_expects.map(me => this.model[me.name] && this.model[me.name].dataPromise).filter(f => f))));
 
     this.ui = (this.model.ui || {}).config || this.ui || config.ui;
     this._super();
@@ -132,22 +134,21 @@ const Component = Events.extend({
    */
   startLoading() {
  
-    when(() => this.readyPromise.get().state == FULFILLED,
-      () => {
+    when(() => this.isReady(), () => {
+      this.loadingDone();
+      this._readyOnce = true;
+      this.readyOnce();
+    }, {name:"readyOnce"} );
+    
+    reaction(() => this.isReady(), ready => {
+      this._ready = ready;
+      if (ready) {
         this.loadingDone();
-        this._readyOnce = true;
-        this.readyOnce();
-      }, {name:"readyOnce"} );
-    reaction(() => this.readyPromise.get().state == FULFILLED,
-      (ready) => {
-        (this._ready = ready)
-        if (ready) {
-          this.loadingDone();
-          this.ready();
-        } else {
-          this.loading();
-        }
-      },{name:"ready"});
+        this.ready();
+      } else {
+        this.loading();
+      }
+    },{name:"ready"});
 
   },
 
@@ -161,11 +162,8 @@ const Component = Events.extend({
     //this.setReady();
   },
 
-  getReadyPromise() {
-    return Promise.all(
-      //map data connected promises
-      this.model_expects.map(me => this.model[me.name] && this.model[me.name].dataPromise).filter(f => f)
-    );
+  isReady() {
+    return this.readyPromise.get().state == FULFILLED;
   },
 
   /**
