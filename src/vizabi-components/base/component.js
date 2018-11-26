@@ -48,10 +48,7 @@ const Component = Events.extend({
     this.model_binds   = this.model_binds || {};
     this.createModel(config.model);
 
-    this.readyPromise = computed(() => fromPromise(Promise.all(
-        //map data connected promises
-        this.model_expects.map(me => this.model[me.name] && this.model[me.name].dataPromise).filter(f => f))));
-
+    this.readyPromise = computed(() => fromPromise(this.getReadyPromise()));
     this.ui = (this.model.ui || {}).config || this.ui || config.ui;
     this._super();
 
@@ -160,6 +157,13 @@ const Component = Events.extend({
     utils.removeClass(this.placeholder, class_loading_first);
     utils.removeClass(this.placeholder, class_loading_data);
     //this.setReady();
+  },
+
+  getReadyPromise() {
+    return Promise.all(
+      //map data connected promises
+      this.model_expects.map(me => this.model[me.name] && this.model[me.name].dataPromise).filter(f => f)
+    );
   },
 
   isReady() {
