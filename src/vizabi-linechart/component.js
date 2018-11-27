@@ -176,6 +176,7 @@ const LCComponent = Component.extend("linechart", {
     reaction(() => {
       const encY = this.model.marker.encoding.get("y");
       return [
+        encY.scale.config.domain,
         encY.scale.type, 
         encY.scale.domainMin,
         encY.scale.domainMax,
