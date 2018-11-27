@@ -183,14 +183,14 @@ const LCComponent = Component.extend("linechart", {
         encY.scale.zoomedMax
       ]
     }, () => {
-      if (!_this.all_values || !_this.values) return;
-      _this.updateIndicators();
-      _this.updateShow();
-      _this.zoomToMaxMin();
-      _this.updateSize();
-      _this.updateTime();
-      _this.redrawDataPoints();
-      _this.highlightLines();          
+      if (!this.isReady() || !this.all_values || !this.values) return;
+      this.updateIndicators();
+      this.updateShow();
+      this.zoomToMaxMin();
+      this.updateSize();
+      this.updateTime();
+      this.redrawDataPoints();
+      this.highlightLines();          
     });
 
     reaction(() => this.model.marker.encoding.get("color").palette, palette => {
