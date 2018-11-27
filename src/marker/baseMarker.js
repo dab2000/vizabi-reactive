@@ -1,4 +1,4 @@
-import { trace, computed, observable, toJS, action } from 'mobx';
+import { trace, computed, observable, toJS, action, reaction } from 'mobx';
 import { encodingStore } from '../encoding/encodingStore'
 import { dataSourceStore } from '../dataSource/dataSourceStore'
 import { assign, createMarkerKey, applyDefaults, isString, intersect, deepmerge } from "../utils";
@@ -150,7 +150,13 @@ let functions = {
     setSpace: action("setSpace", function(space) {
         this.config.data.space = space;
         this.config.data.filter.dimensions = deepmerge.all(space.map(dim => ({[dim]: {}})));
-    })
+    }),
+    setUpReactions() {
+        //connect 'encoding' computed value to empty reaction
+        //because non-tracked computed value recompute on each get access
+        //can be changed with keepAlive from mobx-utils
+        reaction(() => this.encoding, () => {});
+    }
 }
 
 export function baseMarker(config) {
