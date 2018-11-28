@@ -431,7 +431,7 @@ const ColorLegend = Component.extend({
             .style("background-color", cScale(d[_this.colorlegendDim]))
             .style("border", "1px solid " + cScale(d[_this.colorlegendDim]));
           //Apply names to color legend entries if color is a property
-          let label = _this.colorlegendMarker ? _this.frame.label[d[_this.colorlegendDim]] : null;
+          let label = _this.model.legendMarker ? _this.frame.get(d[Symbol.for("key")]).name : null;
           if (!label && label !== 0) label = d[_this.colorlegendDim];
           d3.select(this).select(".vzb-cl-color-legend").text(label);
         });
