@@ -1,6 +1,7 @@
 import { baseDataSource } from './baseDataSource'
 import { createStore } from '../genericStore'
 import { defaultDecorator, mergeResults } from '../utils'
+import { extendObservable } from 'mobx';
 
 export const dataSourceStore = createStore(baseDataSource);
 
@@ -21,10 +22,10 @@ dataSourceStore.createAndAddType = function(type, readerObject) {
     }));
 }
 
-dataSourceStore.getTags = function() {
+extendObservable(dataSourceStore, { get tags() {
     const S_DSNAME = Symbol.for("dataSourceName");
     
     return Promise.all([...this.named.values()].map(ds => ds.getTags().then(
         tags => tags.map(tag => { tag[S_DSNAME] = this.getId(ds); return tag; } ))))
         .then(results => mergeResults(results, ["tag"]));
-}
+}});

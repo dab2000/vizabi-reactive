@@ -667,9 +667,9 @@ const TreeMenu = Component.extend({
   // // },
 
   ready() {
-    const tags = this.model.dataSources.getTags()
-      .then(this._buildIndicatorsTree.bind(this))
-      .then(this.updateView.bind(this));
+    // const tags = this.model.dataSources.tags
+    //   .then(this._buildIndicatorsTree.bind(this))
+    //   .then(this.updateView.bind(this));
   },
 
   readyOnce() {
@@ -744,6 +744,10 @@ const TreeMenu = Component.extend({
     _this._enableSearch();
 
     _this.resize();
+
+    autorun(() => this.model.dataSources.tags.then(this._buildIndicatorsTree.bind(this))
+      .then(this.updateView.bind(this))
+    );
   },
 
 
