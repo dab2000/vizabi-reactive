@@ -5,6 +5,7 @@ import { trace } from 'mobx';
 import { dotToJoin, addExplicitAnd } from '../ddfquerytransform';
 import { localeStore } from '../locale/localeStore';
 import { dataSourceStore } from './dataSourceStore';
+import { DataStorage } from '../datastorage';
 //import { csv, interpolate } from 'd3';
 
 const defaultConfig = {
@@ -171,8 +172,9 @@ const functions = {
         query = dotToJoin(query);
         query = addExplicitAnd(query);
         console.log('Querying', query);
-        const readPromise = this.reader.read(query).then(data => data.map(tryParseRow));
-        return fromPromise(readPromise);
+        //const readPromise = this.reader.read(query).then(data => data.map(tryParseRow));
+        const readPromise = DataStorage.loadFromReader(query, {}, this.reader);
+        return fromPromise(readPromise.then(id => DataStorage.getData(id)));
     },
     interpolate: function(data, { dimension, concepts, step }) {
         const space = this.space;
