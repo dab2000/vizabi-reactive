@@ -1,3 +1,5 @@
+import './d3.genericLogScale';
+
 import { markerStore } from './marker/markerStore'
 import { encodingStore } from './encoding/encodingStore'
 import { dataSourceStore } from './dataSource/dataSourceStore'

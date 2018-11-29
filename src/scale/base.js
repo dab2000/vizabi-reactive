@@ -4,6 +4,7 @@ import { isDate } from "../vizabiUtils";
 const scales = {
     "linear": d3.scaleLinear,
     "log": d3.scaleLog,
+    "genericLog": d3.scaleGenericLog,
     "sqrt": d3.scaleSqrt,
     "ordinal": d3.scaleOrdinal,
     "point": d3.scalePoint,
@@ -58,9 +59,10 @@ export function base(config = {}, parent) {
             return this.data.domain;
         },
         get d3Scale() {
-            const scale = scales[this.type]();
-            const domain = (this.type == "log" && this.domain[0] == 0) ? [1, this.domain[1]] : this.domain;
-            return scale.range(this.range).domain(domain);
+            const type = (this.type == "log" && this.domain[0] <= 0) ? "genericLog" : this.type;
+            const scale = scales[type]();
+            //const domain = (this.type == "log" && this.domain[0] == 0) ? [0.0001, this.domain[1]] : this.domain;
+            return scale.domain(this.domain).range(this.range);
         },
         get isDiscrete() {
             return this.type == this.ordinalScale;
